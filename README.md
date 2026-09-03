@@ -27,3 +27,33 @@ python game_recommendation.py
 ### Script Ausiliari e Riproducibilità
 
 I file `data/dataset_games.csv` e `logic/conoscenza_giochi.pl` sono già inclusi nella repository per consentire l'esecuzione immediata della pipeline senza passaggi preliminari. Gli script contenuti nella cartella `scripts/` sono stati impiegati durante lo sviluppo per compiti specifici: `preprocess.py` ha ripulito il dataset grezzo e generato i fatti logici; `fetch_steam_profile.py` ha interrogato le API di Steam per creare il profilo utente di partenza; `bayesian_network.py` e `machine_learning.py` sono serviti a calibrare, validare e confrontare singolarmente i rispettivi modelli prima della loro integrazione nel modulo principale.
+
+### Collegamento di un Profilo Steam Personalizzato
+
+Il progetto include già un profilo di default in `logic/profilo_utente.pl`. Se si desidera testare il sistema con una libreria Steam diversa, è possibile sincronizzare un nuovo account tramite lo script `scripts/fetch_steam_profile.py`:
+
+1. **Requisiti dell'account Steam**:
+   * Impostare lo stato del profilo e i dettagli dei giochi su **Pubblico** (nel client Steam: *Modifica profilo > Impostazioni sulla privacy*).
+   * Ottenere una chiave API gratuita dalla pagina [Steam Web API](https://steamcommunity.com/dev/apikey).
+   * Recuperare il proprio identificativo numerico **SteamID64** a 17 cifre (visibile dall'URL del profilo o tramite strumenti come steamid.io).
+
+2. **Configurazione dello script**:
+   * Aprire il file `scripts/fetch_steam_profile.py`.
+   * Assegnare i valori recuperati alle rispettive variabili di configurazione:
+     ```python
+     STEAM_API_KEY = "LA_TUA_CHIAVE_API"
+     STEAM_ID = "IL_TUO_STEAM_ID_64"
+     ```
+
+3. **Estrazione e generazione della conoscenza**:
+   * Eseguire lo script dalla radice del repository:
+     ```bash
+     python scripts/fetch_steam_profile.py
+     ```
+   * Lo script interrogherà le API di Steam (`GetOwnedGames`), analizzerà la cronologia d'uso per ricavare i generi con maggior tempo di gioco e sovrascriverà automaticamente `logic/profilo_utente.pl` con i nuovi fatti (`gia_giocato/1`, `genere_gradito/1`, `budget_utente/1`).
+
+4. **Avvio della pipeline**:
+   * Lanciare nuovamente lo script principale per calcolare le raccomandazioni sul nuovo profilo:
+     ```bash
+     python game_recommendation.py
+     ```
