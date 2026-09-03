@@ -3,8 +3,8 @@ import pandas as pd
 import numpy as np
 
 # Inserisci qui la chiave a 32 caratteri ottenuta da https://steamcommunity.com/dev/apikey
-API_KEY = "7F8930173F2175A4ACA2A6B916B4D839"
-STEAM_ID = "76561198439482035"
+API_KEY = "LA_TUA_API_KEY"
+STEAM_ID = "IL_TUO_STEAM_ID"
 
 def format_prolog_atom(text):
     if pd.isna(text): return "unknown"
