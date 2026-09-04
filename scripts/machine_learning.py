@@ -1,92 +1,103 @@
-import pandas as pd
+import os
 import numpy as np
-from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
+import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, roc_auc_score, confusion_matrix
+from sklearn.model_selection import StratifiedKFold, cross_validate
 
-print("=== FASE 4: Apprendimento Supervisionato (Decision Tree & Random Forest) ===")
+print("===================================================================")
+print(" MODULO MACHINE LEARNING: COMPARAZIONE E STRATIFIED K-FOLD CV ")
+print("===================================================================\n")
 
-# 1. Caricamento del dataset
-df = pd.read_csv("dataset_games.csv")
+# 1. Caricamento del dataset elaborato
+dataset_path = "data/dataset_games.csv" if os.path.exists("data/dataset_games.csv") else "dataset_games.csv"
 
-# 2. Selezione feature e encoding
+if not os.path.exists(dataset_path):
+    raise FileNotFoundError(f"Impossibile trovare il dataset in '{dataset_path}'. Eseguire prima preprocess.py.")
+
+df = pd.read_csv(dataset_path)
+print(f"Dataset caricato correttamente: {len(df)} istanze.")
+
+# 2. Definizione Features e Target
 features = ['genre_1', 'genre_2', 'price_category', 'playtime_category', 'platform_support']
-X = df[features].copy()
-y = (df['recommended'] == 'yes').astype(int) # Target binario: 1 = yes, 0 = no
+X_raw = df[features].copy()
+y = (df['recommended'] == 'yes').astype(int)
 
-# Raggruppamento generi rari per limitare la dimensionalità della matrice sparsa
-top_genres = X['genre_1'].value_counts().nlargest(15).index.tolist()
-X['genre_1'] = X['genre_1'].apply(lambda g: g if g in top_genres else 'other')
-X['genre_2'] = X['genre_2'].apply(lambda g: g if g in top_genres else 'other')
+# Raggruppamento generi rari in 'other' per evitare sparsità
+top_genres = X_raw['genre_1'].value_counts().nlargest(15).index.tolist()
+X_raw['genre_1'] = X_raw['genre_1'].apply(lambda g: g if g in top_genres else 'other')
+X_raw['genre_2'] = X_raw['genre_2'].apply(lambda g: g if g in top_genres else 'other')
 
-# One-Hot Encoding per le variabili categoriche
-X_encoded = pd.get_dummies(X, drop_first=True)
-feature_names = X_encoded.columns.tolist()
+# One-Hot Encoding
+X = pd.get_dummies(X_raw, drop_first=True)
 
-print(f"Campioni: {X_encoded.shape[0]} | Feature codificate: {X_encoded.shape[1]}")
-print(f"Bilanciamento classi target: {dict(y.value_counts(normalize=True).round(3))}")
+print(f"Feature matrix X: {X.shape[0]} righe, {X.shape[1]} colonne codificate.")
+print(f"Distribuzione classi target: {np.bincount(y)} (0: Negativo, 1: Positivo)\n")
 
-# 3. Stratified Train-Test Split (80% Train, 20% Test)
-X_train, X_test, y_train, y_test = train_test_split(
-    X_encoded, y, test_size=0.20, random_state=42, stratify=y
-)
+# 3. Definizione Modelli da confrontare
+modelli = {
+    "Decision Tree": DecisionTreeClassifier(
+        max_depth=8,
+        min_samples_leaf=10,
+        random_state=42
+    ),
+    "Random Forest": RandomForestClassifier(
+        n_estimators=150,
+        max_depth=8,
+        min_samples_leaf=10,
+        random_state=42,
+        n_jobs=-1
+    )
+}
 
-# 4. Modello 1: Decision Tree (con regolarizzazione della profondità)
-dt_model = DecisionTreeClassifier(max_depth=6, min_samples_leaf=15, random_state=42)
-dt_model.fit(X_train, y_train)
+# 4. Configurazione Stratified K-Fold CV (10 fold)
+n_splits = 10
+skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
 
-# 5. Modello 2: Random Forest (Ensemble di 150 stimatori)
-rf_model = RandomForestClassifier(n_estimators=150, max_depth=8, min_samples_leaf=10, random_state=42, n_jobs=-1)
-rf_model.fit(X_train, y_train)
+scoring = {
+    'accuracy': 'accuracy',
+    'precision': 'precision',
+    'recall': 'recall',
+    'f1': 'f1'
+}
 
-# 6. Validazione Incrociata (Stratified 5-Fold Cross Validation)
-cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-cv_dt = cross_val_score(dt_model, X_train, y_train, cv=cv, scoring='f1')
-cv_rf = cross_val_score(rf_model, X_train, y_train, cv=cv, scoring='f1')
+risultati = []
 
-print("\n--- Risultati Cross-Validation (F1-Score 5-Fold) ---")
-print(f"Decision Tree F1: {cv_dt.mean():.4f} (+/- {cv_dt.std():.4f})")
-print(f"Random Forest F1: {cv_rf.mean():.4f} (+/- {cv_rf.std():.4f})")
+print(f"Avvio validazione ({n_splits}-Fold Stratified Cross Validation)...")
 
-# 7. Valutazione sul Test Set Indipendente
-y_pred_dt = dt_model.predict(X_test)
-y_prob_dt = dt_model.predict_proba(X_test)[:, 1]
-
-y_pred_rf = rf_model.predict(X_test)
-y_prob_rf = rf_model.predict_proba(X_test)[:, 1]
-
-print("\n=======================================================")
-print(" REPORT DI CLASSIFICAZIONE: RANDOM FOREST ")
-print("=======================================================")
-print(classification_report(y_test, y_pred_rf, target_names=['No', 'Yes']))
-print(f"ROC-AUC Score: {roc_auc_score(y_test, y_prob_rf):.4f}")
-
-# 8. Feature Importance (Interpretazione delle decisioni)
-importances = pd.Series(rf_model.feature_importances_, index=feature_names)
-print("\nTop 7 Feature più Determinanti secondo Random Forest:")
-for feat, imp in importances.sort_values(ascending=False).head(7).items():
-    print(f"  - {feat:<35}: {imp:.4f} ({imp*100:.1f}%)")
-
-# 9. Funzione Predittiva per la Pipeline Finale
-def predict_ml_score(genre_1, genre_2, price, playtime, platform):
-    """Calcola la probabilità di raccomandazione predetta dal Random Forest."""
-    g1 = genre_1 if genre_1 in top_genres else 'other'
-    g2 = genre_2 if genre_2 in top_genres else 'other'
+for nome, modello in modelli.items():
+    scores = cross_validate(modello, X, y, cv=skf, scoring=scoring, n_jobs=-1)
     
-    sample_dict = {col: 0 for col in feature_names}
+    acc_mean, acc_std = np.mean(scores['test_accuracy']), np.std(scores['test_accuracy'])
+    prec_mean, prec_std = np.mean(scores['test_precision']), np.std(scores['test_precision'])
+    rec_mean, rec_std = np.mean(scores['test_recall']), np.std(scores['test_recall'])
+    f1_mean, f1_std = np.mean(scores['test_f1']), np.std(scores['test_f1'])
     
-    # Assegnazione valori Dummy
-    for k, v in [('genre_1', g1), ('genre_2', g2), ('price_category', price), 
-                 ('playtime_category', playtime), ('platform_support', platform)]:
-        col_name = f"{k}_{v}"
-        if col_name in sample_dict:
-            sample_dict[col_name] = 1
-            
-    sample_df = pd.DataFrame([sample_dict])
-    prob_yes = rf_model.predict_proba(sample_df)[0][1]
-    return float(prob_yes)
+    risultati.append({
+        "Modello": nome,
+        "Accuracy (mean ± std)": f"{acc_mean:.4f} ± {acc_std:.4f}",
+        "Precision (mean ± std)": f"{prec_mean:.4f} ± {prec_std:.4f}",
+        "Recall (mean ± std)": f"{rec_mean:.4f} ± {rec_std:.4f}",
+        "F1-Score (mean ± std)": f"{f1_mean:.4f} ± {f1_std:.4f}",
+        "_acc_num": acc_mean,
+        "_f1_num": f1_mean
+    })
 
-if __name__ == "__main__":
-    test_p = predict_ml_score('horror', 'action', 'budget', 'medium', 'multiplatform')
-    print(f"\nPredizione test Random Forest (Horror, Budget, Medium): {test_p:.4f}")
+df_risultati = pd.DataFrame(risultati)
+
+# 5. Stampa Tabella Riassuntiva Richiesta dalle Linee Guida
+print("\n" + "="*90)
+print(" TABELLA RIASSUNTIVA COMPARATIVA (Stratified 10-Fold CV) ")
+print("="*90)
+colonne_stampa = ["Modello", "Accuracy (mean ± std)", "Precision (mean ± std)", "Recall (mean ± std)", "F1-Score (mean ± std)"]
+print(df_risultati[colonne_stampa].to_string(index=False))
+print("="*90)
+
+# 6. Feature Importance (Random Forest)
+rf = modelli["Random Forest"]
+rf.fit(X, y)
+importances = pd.Series(rf.feature_importances_, index=X.columns).sort_values(ascending=False)
+
+print("\nTop 10 Feature più determinanti per la classificazione (Random Forest):")
+for feat, imp in importances.head(10).items():
+    print(f"- {feat:<30}: {imp:.4f}")

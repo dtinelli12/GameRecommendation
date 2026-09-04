@@ -7,7 +7,7 @@
 :- consult('profilo_utente.pl').
 
 % =====================================================================
-% 2. MODELLAZIONE DELLE SAGHE E PREQUEL (Cap. 5.6)
+% 2. MODELLAZIONE DELLE SAGHE E PREQUEL
 % Relazioni binarie ground che definiscono i grafi di dipendenza narrativa
 % =====================================================================
 
@@ -101,32 +101,36 @@ prequel_diretto('bendy_and_the_ink_machine', 'boris_and_the_dark_survival').
 prequel_diretto('bendy_and_the_ink_machine', 'bendy_and_the_dark_revival').
 
 % =====================================================================
-% 3. REGOLA RICORSIVA: Chiusura Transitiva (Cap. 5.6)
+% 3. REGOLA RICORSIVA: Chiusura Transitiva
+% Risoluzione SLD con profondita variabile su grafi di saghe
 % =====================================================================
-% Caso base: X è prequel diretto di Y
+% Caso base: X precede direttamente Y
 da_giocare_prima(X, Y) :- 
     prequel_diretto(X, Y).
 
-% Passo induttivo: X è prequel di Z e Z precede Y
+% Passo induttivo: X precede Z e Z precede Y
 da_giocare_prima(X, Y) :- 
     prequel_diretto(X, Z), 
     da_giocare_prima(Z, Y).
 
 % =====================================================================
-% 4. REGOLE AUSILIARIE DI COMPATIBILITÀ (Cap. 4.3)
+% 4. REGOLE AUSILIARIE DI COMPATIBILITA
 % =====================================================================
-% Verifica se almeno uno dei generi del titolo rientra nei gusti dell'utente
+% Verifica generi
 genere_compatibile(G1, _) :- genere_gradito(G1).
 genere_compatibile(_, G2) :- genere_gradito(G2).
 
+% Vincolo di continuita narrativa (NAF sotto CWA)
+saga_rispettata(Titolo) :-
+    \+ (da_giocare_prima(Prequel, Titolo), \+ gia_giocato(Prequel)).
+
 % =====================================================================
-% 5. REGOLA PRINCIPALE DI RACCOMANDAZIONE (Cap. 4.3, 4.7, 5.8)
+% 5. REGOLA PRINCIPALE DI RACCOMANDAZIONE
 % Inferenza basata su Risoluzione SLD e Negation as Failure (NAF)
-% sotto Closed-World Assumption (CWA)
 % =====================================================================
 consigliato(Titolo) :-
     gioco(Titolo, _Dev, G1, G2, Prezzo, _Playtime, _Platform, 'yes'),
     genere_compatibile(G1, G2),
     fascia_prezzo_accettabile(Prezzo),
     \+ gia_giocato(Titolo),
-    \+ (da_giocare_prima(Prequel, Titolo), \+ gia_giocato(Prequel)).
+    saga_rispettata(Titolo).

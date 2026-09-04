@@ -1,5 +1,19 @@
+# Ambienti virtuali (tutte le convenzioni comuni)
 venv/
+.venv/
+env/
+
+# Cache e compilati Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# File di configurazione IDE / OS
 .vscode/
 .idea/
+.DS_Store
+Thumbs.db
+
+# File di ambiente con chiavi private / token
+.env
