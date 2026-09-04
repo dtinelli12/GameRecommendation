@@ -4,7 +4,7 @@ Progetto per l'esame di **Ingegneria della Conoscenza (ICon)**
 **Dipartimento di Informatica — Università degli Studi di Bari Aldo Moro**  
 * **Studente:** Domenico Tinelli (Matr. 777022)  
 * **Anno Accademico:** 2025-2026  
-* **Documentazione Completa:** consultare [`documentazione.md`](documentazione.md) per i dettagli teorici, le scelte di progetto e le valutazioni sperimentali.
+* **Documentazione Completa:** consultare [documentazione.md](documentazione.md) (o la versione [documentazione.pdf](documentazione.pdf)) per i dettagli teorici, le scelte di progetto e le valutazioni sperimentali.
 
 ---
 
