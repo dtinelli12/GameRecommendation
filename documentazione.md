@@ -112,12 +112,12 @@ Il progetto implementa un **Knowledge-Based System (KBS) ibrido a tre paradigmi 
 * **Argomento 1: Rappresentazione della Conoscenza e Ragionamento Simbolico** *(Parte II del Programma)*
   * **Formalizzazione:** Clausole di Horn definite suddivise tra fatti ground estesi (`conoscenza_giochi.pl`), fatti dinamici di profilo (`profilo_utente.pl`) e regole deduttive (`regole.pl`).
   * **Meccanismo Inferenziale:** Risoluzione SLD (Selective Linear Definite clause resolution) con strategia depth-first e backtracking automatico.
-  * **Complessità Assiomatica:** Modellazione della continuità narrative su grafo aciclico orientato (DAG) tramite **chiusura transitiva ricorsiva** (`da_giocare_prima/2`) e **Negation as Failure (NAF)** sotto Closed-World Assumption (`saga_rispettata/1`), superando la natura di semplice pattern-matching tabellare.
+  * **Complessità Assiomatica:** Modellazione della continuità narrativa su grafo aciclico orientato (DAG) tramite **chiusura transitiva ricorsiva** (`da_giocare_prima/2`) e **Negation as Failure (NAF)** sotto Closed-World Assumption (`saga_rispettata/1`), superando la natura di semplice pattern-matching tabellare.
 
 * **Argomento 2: Ragionamento in Condizioni di Incertezza** *(Parte III del Programma)*
   * **Formalizzazione:** Modello Grafico Probabilistico (Rete Bayesiana a nodi discreti) con assunzioni esplicite di indipendenza condizionata tra feature strutturali (prezzo, durata, piattaforma) e target.
   * **Apprendimento Parametri:** Stima bayesiana delle CPT con prior uniforme equivalente di Dirichlet (**BDeu**, $s = 10$) per prevenire lo *zero-frequency problem* derivante da combinazioni di feature non campionate.
-  * **Inferenza Esatta:** Algoritmo di **Variable Elimination (VE)** per calcolare la distribuzione a posteriori $P(\text{Recommended} = \text{yes} \mid \mathbf{e})$ marginalizzando le variabili latenti.
+* **Inferenza Esatta:** Algoritmo di **Variable Elimination (VE)** per calcolare la distribuzione a posteriori $P(\text{Recommended} = \text{yes} \mid \mathbf{e})$ marginalizzando le variabili latenti.
 
 * **Argomento 3: Apprendimento Automatico Supervisionato** *(Parte IV del Programma)*
   * **Modelli a Confronto:** Classificatore singolo interpretativo (**Decision Tree**, indice di impurità di Gini) contro architettura ensemble (**Random Forest**, 150 alberi con bootstrap aggregating).
@@ -209,10 +209,10 @@ consigliato(Titolo) :-
 ### Valutazione
 
 #### Complessità Computazionale
-Dato che il grafo delle saghe narrative $\mathcal{G} = (\mathcal{V}, \mathcal{E})$ è rigorosamente privo di cicli (DAG), la risoluzione SLD per la chiusura transitiva ha una complessità temporale nel caso peggiore limitata superiormente da $O(|\mathcal{V}| + |\mathcal{E}|)$. Ciò assicura la terminazione finita dell'albero di derivazione senza rischio di ricorsione infinita.
+Dato che il grafo delle saghe narrative $\mathcal{G} = (\mathcal{V}, \mathcal{E})$ è privo di cicli (DAG), la risoluzione SLD per la chiusura transitiva ha una complessità temporale nel caso peggiore limitata superiormente da $O(|\mathcal{V}| + |\mathcal{E}|)$, assicurando la terminazione finita dell'albero di derivazione.
 
 #### Riduzione dello Spazio degli Stati
-Il modulo Prolog opera come filtro vincolare deterministico (hard constraint). La sua efficacia nella riduzione dello spazio di ricerca per i modelli successivi (Rete Bayesiana e Machine Learning) è sintetizzata nella seguente tabella:
+Il modulo Prolog opera come filtro vincolare deterministico (hard constraint). La sua efficacia nella riduzione dello spazio di ricerca per i modelli successivi è sintetizzata nella seguente tabella:
 
 | Fase della Pipeline | Cardinalità Istanze | Descrizione Operativa |
 | :--- | :---: | :--- |
@@ -304,8 +304,8 @@ L'inferenza esatta è eseguita interrogando la distribuzione a posteriori su $11
 * **Interpretazione:** Il modello penalizza sensibilmente la combinazione di prezzo pieno (`aaa_full`) e longevità ridotta (`short`), abbattendo la fiducia statistica di oltre $26$ punti percentuali rispetto alla Query A.
 
 #### Query C — Impatto Marginale del Supporto Multipiattaforma su Titoli Indie
-* **Evidenza Windows-only:** $\mathbf{e}_{C1} = \{\text{genre\_1} = \text{'indie'}, \, \text{platform\_support} = \text{'windows_only'}\} \rightarrow P = \mathbf{50.60\%}$
-* **Evidenza Multiplatform:** $\mathbf{e}_{C2} = \{\text{genre\_1} = \text{'indie'}, \, \text{platform\_support} = \text{'multiplatform'}\} \rightarrow P = \mathbf{67.17\%}$
+* **Evidenza Windows-only:** `{'genre_1': 'indie', 'platform_support': 'windows_only'}` $\rightarrow P = \mathbf{50.60\%}$
+* **Evidenza Multiplatform:** `{'genre_1': 'indie', 'platform_support': 'multiplatform'}` $\rightarrow P = \mathbf{67.17\%}$
 * **Interpretazione:** Il supporto esteso agli ambienti Linux e macOS garantisce un delta positivo netto di **$+16.57\%$** sulla probabilità di raccomandazione positiva, evidenziando il valore strategico della portabilità per le produzioni indipendenti.
 
 ---
@@ -430,7 +430,7 @@ $$\mathcal{B}(g) = \left( \frac{v_g}{v_g + m} \right) \cdot R_g + \left( \frac{m
 
 dove:
 * $v_g$ è il volume totale di recensioni ricevute dal gioco ($v_g = \text{positive\_ratings} + \text{negative\_ratings}$).
-* $R_g$ è il rapporto grezzo di recensioni positive ($R_g = \frac{\text{positive\_ratings}}{v_g}$).
+* $R_g$ è il rapporto grezzo di recensioni positive ($R_g = \text{positive\_ratings} / v_g$).
 * $C$ è il gradimento medio complessivo del catalogo ($C \approx 0.748$).
 * $m = 300$ è la soglia di inerzia a priori che attira i titoli con pochi voti verso la media globale $C$, impedendo a titoli con campionamento ridotto (es. 50 voti tutti positivi, $100\%$) di scavalcare ingiustamente capolavori consolidati con decine di migliaia di recensioni.
 
