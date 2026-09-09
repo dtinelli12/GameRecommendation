@@ -32,6 +32,7 @@ gia_giocato('sherlock_holmes_versus_jack_the_ripper').
 gia_giocato('bully_scholarship_edition').
 gia_giocato('grand_theft_auto_iv_the_complete_edition').
 gia_giocato('assassins_creed').
+gia_giocato('batman_arkham_asylum').
 gia_giocato('silent_hill_homecoming').
 gia_giocato('resident_evil_5').
 gia_giocato('penumbra_black_plague').

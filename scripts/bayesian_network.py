@@ -1,13 +1,27 @@
+import os
 import pandas as pd
 import numpy as np
 from pgmpy.models import DiscreteBayesianNetwork
 from pgmpy.estimators import BayesianEstimator
 from pgmpy.inference import VariableElimination
+import warnings
+warnings.filterwarnings('ignore')
 
 print("=== FASE 3: Costruzione e Addestramento Rete Bayesiana ===")
 
-# 1. Caricamento del dataset
-df = pd.read_csv("dataset_games.csv")
+# 1. Caricamento del dataset con gestione dinamica del percorso
+if os.path.exists("data/dataset_games.csv"):
+    csv_path = "data/dataset_games.csv"
+elif os.path.exists("../data/dataset_games.csv"):
+    csv_path = "../data/dataset_games.csv"
+else:
+    csv_path = os.path.join(os.path.dirname(__file__), "..", "data", "dataset_games.csv")
+
+if not os.path.exists(csv_path):
+    raise FileNotFoundError(f"Impossibile trovare il dataset in: {csv_path}")
+
+df = pd.read_csv(csv_path)
+print(f"Dataset caricato da '{csv_path}' con {len(df)} istanze.")
 
 # 2. Selezione e pretrattamento delle variabili
 # Limitiamo il nodo genre_1 ai generi più frequenti + horror per evitare l'esplosione delle CPT

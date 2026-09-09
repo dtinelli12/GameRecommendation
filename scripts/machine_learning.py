@@ -9,8 +9,13 @@ print("===================================================================")
 print(" MODULO MACHINE LEARNING: COMPARAZIONE E STRATIFIED K-FOLD CV ")
 print("===================================================================\n")
 
-# 1. Caricamento del dataset elaborato
-dataset_path = "data/dataset_games.csv" if os.path.exists("data/dataset_games.csv") else "dataset_games.csv"
+# 1. Caricamento del dataset elaborato con percorso flessibile
+if os.path.exists("data/dataset_games.csv"):
+    dataset_path = "data/dataset_games.csv"
+elif os.path.exists("../data/dataset_games.csv"):
+    dataset_path = "../data/dataset_games.csv"
+else:
+    dataset_path = os.path.join(os.path.dirname(__file__), "..", "data", "dataset_games.csv")
 
 if not os.path.exists(dataset_path):
     raise FileNotFoundError(f"Impossibile trovare il dataset in '{dataset_path}'. Eseguire prima preprocess.py.")

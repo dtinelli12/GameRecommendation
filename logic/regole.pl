@@ -55,7 +55,9 @@ prequel_diretto('portal', 'portal_2').
 
 % --- Batman Arkham ---
 prequel_diretto('batman_arkham_asylum', 'batman_arkham_city').
+prequel_diretto('batman_arkham_asylum', 'batman_arkham_city_game_of_the_year_edition').
 prequel_diretto('batman_arkham_city', 'batman_arkham_origins').
+prequel_diretto('batman_arkham_city_game_of_the_year_edition', 'batman_arkham_origins').
 prequel_diretto('batman_arkham_origins', 'batman_arkham_knight').
 
 % --- Mass Effect ---

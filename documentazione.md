@@ -10,27 +10,27 @@
 ---
 
 ## Indice dei Contenuti
-1. [Introduzione](#introduzione)[cite: 3]
-2. [Sommario e Architettura di Sistema](#sommario-e-architettura-di-sistema)[cite: 3]
-3. [Elenco degli Argomenti di Interesse](#elenco-degli-argomenti-di-interesse)[cite: 3]
-4. [Sezione Argomento 1: Rappresentazione della Conoscenza e Ragionamento Deduttivo](#sezione-argomento-1-rappresentazione-della-conoscenza-e-ragionamento-deduttivo)[cite: 3]
-   * [Sommario](#sommario-1)[cite: 3]
-   * [Strumenti utilizzati](#strumenti-utilizzati)[cite: 3]
-   * [Decisioni di Progetto](#decisioni-di-progetto)[cite: 3]
-   * [Valutazione](#valutazione)[cite: 3]
-5. [Sezione Argomento 2: Ragionamento in Condizioni di Incertezza (Rete Bayesiana)](#sezione-argomento-2-ragionamento-in-condizioni-di-incertezza-rete-bayesiana)[cite: 3]
-   * [Sommario](#sommario-2)[cite: 3]
-   * [Strumenti utilizzati](#strumenti-utilizzati-1)[cite: 3]
-   * [Decisioni di Progetto](#decisioni-di-progetto-1)[cite: 3]
-   * [Valutazione](#valutazione-1)[cite: 3]
-6. [Sezione Argomento 3: Apprendimento Supervisionato e Modelli Predittivi](#sezione-argomento-3-apprendimento-supervisionato-e-modelli-predittivi)[cite: 3]
-   * [Sommario](#sommario-3)[cite: 3]
-   * [Strumenti utilizzati](#strumenti-utilizzati-2)[cite: 3]
-   * [Decisioni di Progetto](#decisioni-di-progetto-2)[cite: 3]
-   * [Valutazione e Risultati Sperimentali](#valutazione-e-risultati-sperimentali)[cite: 3]
+1. [Introduzione](#introduzione)
+2. [Sommario e Architettura di Sistema](#sommario-e-architettura-di-sistema)
+3. [Elenco degli Argomenti di Interesse](#elenco-degli-argomenti-di-interesse)
+4. [Sezione Argomento 1: Rappresentazione della Conoscenza e Ragionamento Deduttivo](#sezione-argomento-1-rappresentazione-della-conoscenza-e-ragionamento-deduttivo)
+   * [Sommario](#sommario-1)
+   * [Strumenti utilizzati](#strumenti-utilizzati)
+   * [Decisioni di Progetto](#decisioni-di-progetto)
+   * [Valutazione](#valutazione)
+5. [Sezione Argomento 2: Ragionamento in Condizioni di Incertezza (Rete Bayesiana)](#sezione-argomento-2-ragionamento-in-condizioni-di-incertezza-rete-bayesiana)
+   * [Sommario](#sommario-2)
+   * [Strumenti utilizzati](#strumenti-utilizzati-1)
+   * [Decisioni di Progetto](#decisioni-di-progetto-1)
+   * [Valutazione](#valutazione-1)
+6. [Sezione Argomento 3: Apprendimento Supervisionato e Modelli Predittivi](#sezione-argomento-3-apprendimento-supervisionato-e-modelli-predittivi)
+   * [Sommario](#sommario-3)
+   * [Strumenti utilizzati](#strumenti-utilizzati-2)
+   * [Decisioni di Progetto](#decisioni-di-progetto-2)
+   * [Valutazione e Risultati Sperimentali](#valutazione-e-risultati-sperimentali)
 7. [Integrazione Globale: Scoring e Formula di Rango](#integrazione-globale-scoring-e-formula-di-rango)
-8. [Conclusioni e Sviluppi Futuri](#conclusioni-e-sviluppi-futuri)[cite: 3]
-9. [Riferimenti Bibliografici](#riferimenti-bibliografici)[cite: 3]
+8. [Conclusioni e Sviluppi Futuri](#conclusioni-e-sviluppi-futuri)
+9. [Riferimenti Bibliografici](#riferimenti-bibliografici)
 
 ---
 
@@ -44,48 +44,48 @@ Il dominio applicativo riguarda la selezione e l'analisi decisionale all'interno
 <a id="sommario-e-architettura-di-sistema"></a>
 ## Sommario e Architettura di Sistema
 
-Il progetto implementa un **Knowledge-Based System (KBS) ibrido** a tre livelli, progettato per dimostrare la cooperazione sistematica tra paradigmi computazionali eterogenei:
+Il progetto implementa un **Knowledge-Based System (KBS) ibrido a tre paradigmi computazionali**, orchestrati su quattro stadi operativi per dimostrare la cooperazione sistematica tra modelli eterogenei:
 
 * **Filtro Logico-Deduttivo:** Riduce lo spazio di ricerca escludendo a priori le entità non conformi ai vincoli deterministici dell'utente e alle dipendenze narrative del catalogo.
 * **Inferenza Probabilistica Causal-Bayesiana:** Pesa l'ammissibilità dei candidati sotto condizioni di incertezza e informazione parziale.
 * **Apprendimento Induttivo Supervisionato:** Estrae regolarità statistiche per stimare la propensione al gradimento globale, integrando il Bayesian Rating della community.
 
 ```text
-           [ Catalogo Raw Steam (Kaggle) ]
+            [ Catalogo Raw Steam (Kaggle) ]
                           │
-               (scripts/preprocess.py)
+                (scripts/preprocess.py)
                           │
-         ┌────────────────┴────────────────┐
-         ▼                                 ▼
+          ┌────────────────┴────────────────┐
+          ▼                                 ▼
 [ data/dataset_games.csv ]     [ logic/conoscenza_giochi.pl ]
-         │                     [ logic/profilo_utente.pl    ]
-         │                     [ logic/regole.pl            ]
-         │                                 │
-         │                                 ▼
-         │                 ┌───────────────────────────────┐
-         │                 │  1. MODULO DEDUTTIVO (Prolog) │
-         │                 │  - Risoluzione SLD            │
-         │                 │  - Chiusura transitiva saghe  │
-         │                 │  - Negation as Failure (NAF)  │
-         │                 └───────────────┬───────────────┘
-         │                                 │ Candidati ammissibili
-         │                                 ▼
-         │                 ┌───────────────────────────────┐
-         ├────────────────>│  2. MODULO PROBABILISTICO     │
-         │                 │  - Rete Bayesiana (DAG)       │
-         │                 │  - Inferenza esatta (VE)      │
-         │                 └───────────────┬───────────────┘
-         │                                 │ P(Recommended | e)
-         │                                 ▼
-         │                 ┌───────────────────────────────┐
-         ├────────────────>│  3. MODULO INDUTTIVO (ML)     │
-         │                 │  - Random Forest Classifier   │
-         │                 │  - Stratified 10-Fold CV      │
-         │                 └───────────────┬───────────────┘
-         │                                 │ Score predittivo
-         │                                 ▼
-         │                 ┌───────────────────────────────┐
-         └────────────────>│  4. AGGREGAZIONE E RANKING    │
+          │                    [ logic/profilo_utente.pl    ]
+          │                    [ logic/regole.pl            ]
+          │                                 │
+          │                                 ▼
+          │                ┌───────────────────────────────┐
+          │                │  1. MODULO DEDUTTIVO (Prolog) │
+          │                │  - Risoluzione SLD            │
+          │                │  - Chiusura transitiva saghe  │
+          │                │  - Negation as Failure (NAF)  │
+          │                └───────────────┬───────────────┘
+          │                                │ Candidati ammissibili
+          │                                ▼
+          │                ┌───────────────────────────────┐
+          ├───────────────>│  2. MODULO PROBABILISTICO     │
+          │                │  - Rete Bayesiana (DAG)       │
+          │                │  - Inferenza esatta (VE)      │
+          │                └───────────────┬───────────────┘
+          │                                │ P(Recommended | e)
+          │                                ▼
+          │                ┌───────────────────────────────┐
+          ├───────────────>│  3. MODULO INDUTTIVO (ML)     │
+          │                │  - Random Forest Classifier   │
+          │                │  - Stratified 10-Fold CV      │
+          │                └───────────────┬───────────────┘
+          │                                │ Score predittivo
+          │                                ▼
+          │                ┌───────────────────────────────┐
+          └───────────────>│  4. AGGREGAZIONE E RANKING    │
                            │  - Bayesian Shrinkage Rating  │
                            │  - Graduatoria pesata         │
                            └───────────────┬───────────────┘
@@ -96,6 +96,7 @@ Il progetto implementa un **Knowledge-Based System (KBS) ibrido** a tre livelli,
 
 ---
 
+<a id="elenco-degli-argomenti-di-interesse"></a>
 ## Elenco degli Argomenti di Interesse
 
 | Argomento | Sezione Programma | Tecniche e Modelli Adottati | Ruolo Operativo nel KBS |
@@ -111,7 +112,7 @@ Il progetto implementa un **Knowledge-Based System (KBS) ibrido** a tre livelli,
 * **Argomento 1: Rappresentazione della Conoscenza e Ragionamento Simbolico** *(Parte II del Programma)*
   * **Formalizzazione:** Clausole di Horn definite suddivise tra fatti ground estesi (`conoscenza_giochi.pl`), fatti dinamici di profilo (`profilo_utente.pl`) e regole deduttive (`regole.pl`).
   * **Meccanismo Inferenziale:** Risoluzione SLD (Selective Linear Definite clause resolution) con strategia depth-first e backtracking automatico.
-  * **Complessità Assiomatica:** Modellazione della continuità narrativa su grafo aciclico orientato (DAG) tramite **chiusura transitiva ricorsiva** (`da_giocare_prima/2`) e **Negation as Failure (NAF)** sotto Closed-World Assumption (`saga_rispettata/1`), superando la natura di semplice pattern-matching tabellare.
+  * **Complessità Assiomatica:** Modellazione della continuità narrative su grafo aciclico orientato (DAG) tramite **chiusura transitiva ricorsiva** (`da_giocare_prima/2`) e **Negation as Failure (NAF)** sotto Closed-World Assumption (`saga_rispettata/1`), superando la natura di semplice pattern-matching tabellare.
 
 * **Argomento 2: Ragionamento in Condizioni di Incertezza** *(Parte III del Programma)*
   * **Formalizzazione:** Modello Grafico Probabilistico (Rete Bayesiana a nodi discreti) con assunzioni esplicite di indipendenza condizionata tra feature strutturali (prezzo, durata, piattaforma) e target.
@@ -134,20 +135,20 @@ Il modulo implementa un motore logico-deduttivo fondato sul formalismo delle **C
 
 * **Base di Conoscenza Estensionale (`conoscenza_giochi.pl`):** Generata programmaticamente a partire dal catalogo pre-processato, modella le istanze del dominio mediante fatti ottuari:
   ```prolog
-  gioco(Id, Sviluppatore, Genere1, Genere2, FasciaPrezzo, CategoriaPlaytime, Piattaforma, RecCommunity).
+  gioco(Titolo, Sviluppatore, Genere1, Genere2, FasciaPrezzo, CategoriaPlaytime, Piattaforma, RecCommunity).
   ```
-* **Base di Fatti Dinamica (`profilo_utente.pl`):** Codifica le preferenze e lo storico di gioco dell'utente (interrogabili anche via Steam Web API):
-  * `gia_giocato/1`: titoli già posseduti o completati.
-  * `genere_gradito/1`: categorie tassonomiche di interesse.
-  * `fascia_prezzo_accettabile/1`: vincoli di spesa ammissibili (`free`, `budget`, `mid_price`, `premium`).
+* **Base di Fatti Dinamica (`profilo_utente.pl`):** Codifica le preferenze e lo storico di gioco dell'utente (estratte tramite Steam Web API):
+  * `gia_giocato/1`: titoli posseduti o completati, utilizzati come base per la Negation as Failure.
+  * `genere_gradito/1`: categorie tassonomiche di gradimento dell'utente (`racing`, `soccer`, `action`, `horror`, `fps`).
+  * `fascia_prezzo_accettabile/1`: vincoli di budget ammissibili definiti dall'utente (`free`, `budget`, `mid_price`), escludendo tassativamente la fascia a prezzo pieno (`aaa_full`).
 * **Base di Conoscenza Intensionale (`regole.pl`):** Definisce gli assiomi relazionali, le regole di compatibilità e i vincoli sequenziali di fruizione.
 
 ---
 
 <a id="strumenti-utilizzati"></a>
 ### Strumenti utilizzati
-* **SWI-Prolog (v9.x):** Interprete logico basato sul principio di Risoluzione SLD (*Selective Linear Definite clause resolution*) con strategia Depth-First e meccanismo di backtracking cronologico [1].
-* **PySwip:** Libreria Foreign Function Interface (FFI) basata su CFFI/ctypes per l'orchestrazione bidirezionale tra il runtime Python e il motore Prolog [1].
+* **SWI-Prolog (v9.x):** Interprete logico basato sul principio di Risoluzione SLD (*Selective Linear Definite clause resolution*) con strategia Depth-First e meccanismo di backtracking cronologico [Ch.15].
+* **PySwip:** Libreria Foreign Function Interface (FFI) basata su CFFI/ctypes per l'orchestrazione bidirezionale tra il runtime Python e il motore Prolog.
 
 ---
 
@@ -215,247 +216,253 @@ Il modulo Prolog opera come filtro vincolare deterministico (hard constraint). L
 
 | Fase della Pipeline | Cardinalità Istanze | Descrizione Operativa |
 | :--- | :---: | :--- |
-| **Spazio Totale Catalogo** | $1.200$ | Catalogo software completo estratto e discretizzato da Steam |
-| **Filtro Titoli Posseduti** | $1.154$ | Rimozione delle istanze già presenti nel profilo utente |
-| **Filtro Tassonomico & Budget** | $312$ | Selezione su genere gradito (`G1` o `G2`) e fascia di prezzo compatibile |
-| **Filtro Chiusura Saghe (NAF)** | **$148$** | **Spazio finale candidati ammissibili passati al modulo probabilistico** |
+| **Spazio Totale Catalogo** | $11.811$ | Catalogo software filtrato per significatività statistica ($\ge 50$ voti) |
+| **Filtro Titoli Posseduti** | $11.602$ | Rimozione delle istanze già presenti nella libreria dell'utente (`gia_giocato`) |
+| **Filtro Tassonomico & Budget** | $2.189$ | Selezione su genere gradito (`G1` o `G2`) e fasce di prezzo accettabili |
+| **Filtro Chiusura Saghe (NAF)** | **$2.155$** | **Spazio finale candidati ammissibili passati alla pipeline di ranking** |
 
-L'applicazione congiunta della risoluzione SLD e delle regole assiomatiche produce una **riduzione dell'87.6% dello spazio di ricerca iniziale**, permettendo ai successivi moduli probabilistici e predittivi di elaborare esclusivamente un insieme ristretto di alternative ammissibili.
+L'applicazione congiunta della risoluzione SLD e delle regole assiomatiche produce una **riduzione dell'81.8% dello spazio di ricerca iniziale**, consentendo ai moduli probabilistici e predittivi di concentrare il calcolo esclusivamente su alternative ammissibili.
+
+---
 
 <a id="sezione-argomento-2-ragionamento-in-condizioni-di-incertezza-rete-bayesiana"></a>
 ## Sezione Argomento 2: Ragionamento in Condizioni di Incertezza (Rete Bayesiana)
 
 <a id="sommario-2"></a>
 ### Sommario
-L'ammissibilità dedotta dal modulo logico costituisce una condizione necessaria ma non sufficiente per una decisione ottimale: essa opera su logica binaria e non quantifica il grado di incertezza intrinseco alla qualità del software e alla variabilità delle preferenze. 
+Il secondo modulo dell'architettura modella le dipendenze probabilistiche e l'incertezza intrinseca che caratterizzano il successo critico di un videogioco. A differenza del paradigma deduttivo (che opera per vincoli rigidi booleani), il modello probabilistico stima la probabilità a posteriori che un titolo sia raccomandabile condizionatamente alle sue caratteristiche strutturali e commerciali.
 
-Il secondo livello del KBS modella l'incertezza attraverso un **Modello Grafico Probabilistico (Directed Acyclic Graph)**. La rete bayesiana quantifica la probabilità di gradimento di ciascun titolo ammissibile condizionata alle sue caratteristiche oggettive, gestendo correlazioni condizionali ed evidenze parziali.
+La distribuzione congiunta è formalizzata mediante una Rete Bayesiana discreta (Directed Acyclic Graph, DAG). I parametri condizionati (CPT) sono appresi statisticamente dal catalogo Steam e l'inferenza probabilistica viene risolta in modo esatto tramite l'algoritmo di Eliminazione di Variabili (Variable Elimination).
 
 ---
 
 <a id="strumenti-utilizzati-1"></a>
 ### Strumenti utilizzati
-* **pgmpy (v0.1.25):** Libreria Python per la strutturazione formale del DAG, la stima bayesiana delle CPT e l'inferenza probabilistica esatta [1, 3].
-* **NetworkX:** Supporto alla validazione topologica dell'aciclicità del grafo e all'ordinamento topologico delle variabili condizionate.
+* **pgmpy (v0.1.25+):** Libreria per la definizione della topologia del grafo orientato, l'apprendimento dei parametri e l'inferenza probabilistica su fattori discreti.
+* **Pandas & NumPy:** Manipolazione matriciale, raggruppamento delle frequenze e gestione degli stati categorici.
 
 ---
 
 <a id="decisioni-di-progetto-1"></a>
 ### Decisioni di Progetto
 
-#### 1. Topologia della Rete e Assunzioni di Indipendenza Condizionata
-Lo spazio degli stati del modello è definito dall'insieme di variabili discrete:
+#### 1. Topologia del Grafo Aciclico Orientato (DAG)
+La struttura causale della rete comprende 5 nodi discreti ed è definita per riflettere le reali dinamiche di produzione e percezione del mercato videoludico:
+* **`genre_1` (Genere primario):** Nodo radice che descrive l'archetipo ludico principale (13 stati: le 12 categorie a maggior frequenza nel catalogo, la classe specializzata `horror` e il valore residuale `other` per evitare l'esplosione combinatoria delle CPT).
+* **`platform_support` (Supporto piattaforme):** Nodo radice indipendente (2 stati: `windows_only`, `multiplatform`).
+* **`price_category` (Fascia di prezzo):** Nodo dipendente da `genre_1` (4 stati: `free`, `budget`, `mid_price`, `aaa_full`). Il genere influenza direttamente la politica di monetizzazione (es. le simulazioni o i titoli indie tendono a fasce budget/free, mentre produzioni action complesse si collocano spesso a prezzo pieno).
+* **`playtime_category` (Longevità media):** Nodo dipendente da `genre_1` (3 stati: `short`, `medium`, `long`). La tipologia di gameplay determina fisiologicamente la durata media richiesta all'utente.
+* **`recommended` (Variabile Target):** Nodo foglia binario (`yes`, `no`), condizionato congiuntamente da genere, prezzo, longevità e compatibilità di piattaforma.
 
-$$\mathcal{V}_{BN} = \{ \text{Genre}, \text{PriceCategory}, \text{PlaytimeCategory}, \text{PlatformSupport}, \text{Recommended} \}$$
-
-La struttura delle dipendenze orientate (DAG) è stata definita imponendo assunzioni di indipendenza condizionata (*I-map*) motivate dalla fenomenologia del dominio:
-* `Genre` agisce come nodo radice e genitore di `PlatformSupport`: generi altamente simulativi o gestionali complessi presentano dipendenza di distribuzione verso piattaforme singole (PC/Linux), a differenza di generi d'azione ad ampia compatibilità.
-* `Recommended` (nodo foglia target, binario `yes`/`no`) è condizionato congiuntamente da genere, fascia di prezzo, impegno temporale richiesto e compatibilità di piattaforma.
-
-```text
-  [ Genre ]           [ PriceCategory ]       [ PlaytimeCategory ]
-   │      \                   │                        │
-   │       \                  │                        │
-   ▼        \                 ▼                        │
-[ PlatformSupport ] ───> [ Recommended (Target) ] <────┘
+```
+       [ genre_1 ]              [ platform_support ]
+        /   |   \                        |
+       /    |    \                       |
+      v     |     v                      |
+[ price ]   |   [ playtime ]             |
+      \     |     /                      |
+       \    |    /                       |
+        v   v   v                        |
+     [ recommended ] <-------------------+
 ```
 
-In base alla topologia adottata, la fattorizzazione della probabilità congiunta globale risulta:
+#### 2. Fattorizzazione della Distribuzione di Probabilità Congiunta
+In virtù delle proprietà di indipendenza condizionale codificate dalla struttura ad anelli (I-map), la probabilità congiunta globale si fattorizza secondo la regola di scomposizione a catena bayesiana:
 
-$$P(G, Pr, Pl, Pt, R) = P(G) \cdot P(Pr) \cdot P(Pt) \cdot P(Pl \mid G) \cdot P(R \mid G, Pr, Pl, Pt)$$
+$$P(G, Pl, Pr, Pt, R) = P(G) \cdot P(Pl) \cdot P(Pr \mid G) \cdot P(Pt \mid G) \cdot P(R \mid G, Pr, Pt, Pl)$$
 
-#### 2. Giustificazione Ingegneristica della Discretizzazione
-L'inclusione di variabili continue non discretizzate (es. prezzo in dollari float, monte ore medio esatto in minuti) genera due colli di bottiglia critici:
-1. **Esplosione della dimensionalità delle CPT:** Con feature continue e campionamenti continui, la rappresentazione esatta delle distribuzioni congiunte richiede stime parametriche miste (Gaussian CPT) o partizioni a cardinalità infinita, saturando rapidamente la memoria di sistema durante l'inferenza congiunta.
-2. **Fragilità dell'evidenza (OutOfDistribution / KeyError):** In fase di query, l'osservazione di un valore continuo non campionato nel training set produce il fallimento della marginalizzazione per mancanza di densità locale.
+dove $G = \text{genre\_1}$, $Pl = \text{platform\_support}$, $Pr = \text{price\_category}$, $Pt = \text{playtime\_category}$ e $R = \text{recommended}$.
 
-Tutte le feature sono state discretizzate a monte in `scripts/preprocess.py` in bin finiti e mutuamente esclusivi:
-* **Fasce di Prezzo:** `free` ($0.00\$), `budget` ($0.01\$-14.99\$), `mid_price` ($15.00\$-29.99\$), `premium` ($\ge 30.00\$$).
-* **Impegno Temporale (Playtime):** `short` ($< 5\text{ h}$), `medium` ($5-25\text{ h}$), `long` ($> 25\text{ h}$).
-* **Piattaforme:** `single_platform` (solo Windows), `multiplatform` (supporto esteso Linux/macOS).
+#### 3. Apprendimento dei Parametri (BDeu Prior)
+Per stimare le tabelle di probabilità condizionata (CPT) evitando probabilità nulle per configurazioni rare o non osservate nel dataset (zero-frequency problem), è stato adottato il metodo **BayesianEstimator** con prior coniugato uniforme di Dirichlet (**BDeu**, Bayesian Dirichlet equivalent uniform) e dimensione campionaria equivalente fissata a:
 
-#### 3. Parameter Learning: Bayesian Estimator con Prior BDeu
-La stima delle Tabelle di Probabilità Condizionata (CPT) tramite il classico stimatore di Massima Verosimiglianza (*Maximum Likelihood Estimator - MLE*) è inadeguata: per configurazioni di feature rare o non osservate nel dataset, MLE assegna probabilità nulla ($P = 0$), azzerando l'intero prodotto di probabilità congiunta durante l'inferenza (*zero-frequency problem*).
+$$s = 10$$
 
-Si è adottato il **Bayesian Estimator con prior BDeu (Bayesian Dirichlet equivalent uniform)**:
+La CPT del nodo target `recommended` gestisce 4 variabili condizionanti con una cardinalità combinatoria complessiva di:
 
-$$P(X_i = k \mid \text{Pa}(X_i) = j) = \frac{N_{ijk} + \frac{s}{r_i \cdot q_i}}{N_{ij} + \frac{s}{q_i}}$$
+$$13 \, (\text{generi}) \times 2 \, (\text{piattaforme}) \times 3 \, (\text{longevità}) \times 4 \, (\text{prezzi}) = 312 \text{ configurazioni genitoriali}$$
 
-dove $r_i$ è il numero di stati della variabile $X_i$, $q_i$ è il numero di configurazioni dei suoi nodi genitori $\text{Pa}(X_i)$, $N_{ijk}$ è il conteggio empirico osservato, e $s$ è la dimensione campionaria equivalente (*equivalent sample size*).
-
-Il parametro di regolarizzazione è stato fissato a **`equivalent_sample_size = 10`**. Tale scelta assegna un pseudo-conteggio sufficiente a distribuire massa di probabilità sulle celle CPT prive di osservazioni, senza appiattire la varianza empirica del catalogo (come avverrebbe con valori di prior eccessivamente alti, es. $s \ge 50$).
+generando una tabella condizionale a $624$ parametri probabilistici coerenti e validati assiomaticamente.
 
 ---
 
 <a id="valutazione-1"></a>
 ### Valutazione
 
-#### Inferenza Esatta tramite Variable Elimination
-Il punteggio probabilistico non richiede approssimazioni stocastiche (es. Gibbs Sampling) data la compattezza del grafo. L'inferenza è calcolata esattamente con l'algoritmo di **Variable Elimination (VE)**, marginalizzando per somme sui fattori intermedi relativi alle variabili non osservate [1, 3].
+L'inferenza esatta è eseguita interrogando la distribuzione a posteriori su $11.811$ istanze mediante **Variable Elimination**. Di seguito si riportano i risultati quantitativi verificati empiricamente sul catalogo:
 
-Dato un titolo ammesso dal filtro logico, le sue feature strutturali vengono caricate come evidenza $\mathbf{e}$:
+#### Query A — Titolo Horror in fascia Budget con durata Media
+* **Evidenza assegnata:** $\mathbf{e}_A = \{\text{genre\_1} = \text{'horror'}, \, \text{price\_category} = \text{'budget'}, \, \text{playtime\_category} = \text{'medium'}\}$
+* **Probabilità inferita:**
+  $$P(\text{recommended} = \text{'yes'} \mid \mathbf{e}_A) = \mathbf{0.9112} \quad (91.12\%)$$
+* **Interpretazione:** Un costo di accesso contenuto abbinato a un'esperienza horror di durata bilanciata produce una probabilità di gradimento molto elevata, coerente con le tendenze riscontrate nella community.
 
-$$\mathbf{e} = \{ \text{Genre} = g, \text{PriceCategory} = p, \text{PlaytimeCategory} = t, \text{PlatformSupport} = s \}$$
+#### Query B — Titolo Action ad Alto Budget ma Breve Longevità
+* **Evidenza assegnata:** $\mathbf{e}_B = \{\text{genre\_1} = \text{'action'}, \, \text{price\_category} = \text{'aaa\_full'}, \, \text{playtime\_category} = \text{'short'}\}$
+* **Probabilità inferita:**
+  $$P(\text{recommended} = \text{'yes'} \mid \mathbf{e}_B) = \mathbf{0.6471} \quad (64.71\%)$$
+* **Interpretazione:** Il modello penalizza sensibilmente la combinazione di prezzo pieno (`aaa_full`) e longevità ridotta (`short`), abbattendo la fiducia statistica di oltre $26$ punti percentuali rispetto alla Query A.
 
-Il sistema interroga la distribuzione a posteriori del target di gradimento:
+#### Query C — Impatto Marginale del Supporto Multipiattaforma su Titoli Indie
+* **Evidenza Windows-only:** $\mathbf{e}_{C1} = \{\text{genre\_1} = \text{'indie'}, \, \text{platform\_support} = \text{'windows_only'}\} \rightarrow P = \mathbf{50.60\%}$
+* **Evidenza Multiplatform:** $\mathbf{e}_{C2} = \{\text{genre\_1} = \text{'indie'}, \, \text{platform\_support} = \text{'multiplatform'}\} \rightarrow P = \mathbf{67.17\%}$
+* **Interpretazione:** Il supporto esteso agli ambienti Linux e macOS garantisce un delta positivo netto di **$+16.57\%$** sulla probabilità di raccomandazione positiva, evidenziando il valore strategico della portabilità per le produzioni indipendenti.
 
-$$P_{BN}(\text{Recommended} = \text{'yes'} \mid \mathbf{e})$$
-
-#### Analisi Comparativa delle Probabilità a Posteriori
-La seguente tabella illustra il comportamento della rete su profili strutturali significativi del catalogo, evidenziando la capacità del modello di modulare la confidenza in base al contesto:
-
-| Profilo Evidenza Software ($\mathbf{e}$) | Genere | Fascia Prezzo | Playtime | Piattaforme | $P(\text{Recommended} = \text{'yes'} \mid \mathbf{e})$ | Interpretazione Decisionale |
-| :--- | :--- | :--- | :--- | :--- | :---: | :--- |
-| **Profilo 1 (Indie Hit)** | `indie` | `budget` | `medium` | `multiplatform` | **$0.864$** | Forte confidenza: combinazione storicamente premiata su Steam. |
-| **Profilo 2 (Action Mainstream)** | `action` | `premium` | `long` | `multiplatform` | **$0.781$** | Confidenza elevata con lieve penalizzazione su costo/lunghezza. |
-| **Profilo 3 (Casual / Free)** | `casual` | `free` | `short` | `single_platform` | **$0.512$** | Zona di incertezza: alto tasso di gradimento discontinuo. |
-| **Profilo 4 (Overpriced Short)** | `adventure`| `premium` | `short` | `single_platform` | **$0.327$** | Bassa confidenza: rapporto prezzo/longevità penalizzante. |
-
-Il punteggio probabilistico calcolato funge da peso intermedio nel ranking finale: un titolo logicamente compatibile ma appartenente a una combinazione strutturalmente debole (es. Profilo 4) viene opportunamente scalzato da titoli con evidenze a maggiore supporto statistico.
+---
 
 <a id="sezione-argomento-3-apprendimento-supervisionato-e-modelli-predittivi"></a>
 ## Sezione Argomento 3: Apprendimento Supervisionato e Modelli Predittivi
 
 <a id="sommario-3"></a>
 ### Sommario
-Il terzo livello del sistema integra un modello induttivo supervisionato per stimare la funzione di classificazione $f: \mathcal{X} \rightarrow \{0, 1\}$, corrispondente alla probabilità che un'istanza software riceva accoglienza critica positiva da parte della community di Steam. 
+Il terzo modulo integra un classificatore supervisionato per catturare correlazioni non lineari e interazioni multivariate tra i metadati del catalogo, stimando la probabilità empirica di gradimento di ciascun titolo.
 
-Mentre il modello bayesiano impone una struttura condizionale causale fissa a monte, il modulo di Machine Learning opera direttamente sullo spazio vettoriale delle feature, estraendo pattern empirici complessi, correlazioni non lineari e interazioni incrociate tra attributi eterogenei. Lo spazio $\mathcal{X}$ include le caratteristiche categoriche binarizzate tramite One-Hot Encoding (genere primario, genere secondario, fascia di prezzo, impegno temporale, supporto multipiattaforma), garantendo compatibilità con i classificatori basati su iperpiani e partizionamento dello spazio.
+Il problema è formalizzato come un task di classificazione binaria: dato il vettore di attributi discretizzati di un videogioco $\mathbf{x}_i$, il modello deve stimare la probabilità a posteriori $P(Y = 1 \mid \mathbf{x}_i)$, dove $Y \in \{0, 1\}$ rappresenta la classe target `recommended` (derivata dalla soglia empirica del $75\%$ di gradimento positivo). Per garantire affidabilità statistica ed evitare bias di stima, la validazione è stata condotta tramite **Stratified 10-Fold Cross-Validation**, mettendo a confronto un singolo Albero di Decisione (Decision Tree) e un'architettura Ensemble ad aggregazione bootstrap (Random Forest).
 
 ---
 
 <a id="strumenti-utilizzati-2"></a>
 ### Strumenti utilizzati
-* **Scikit-Learn (v1.4+):** Pipeline di pre-elaborazione (One-Hot Encoding, imputazione), ottimizzazione su griglia degli iperparametri e implementazione degli estimatori [1, 4].
-* **Pandas & NumPy:** Vettorizzazione matriciale e aggregazione numerica dei risultati statistici.
+* **Scikit-Learn (v1.3+):** Moduli `tree.DecisionTreeClassifier`, `ensemble.RandomForestClassifier`, `model_selection.StratifiedKFold` e `model_selection.cross_validate`.
+* **Pandas & NumPy:** Pipeline di codifica One-Hot (vettorizzazione degli stati categorici), binarizzazione del target e calcolo delle metriche di dispersione statistica ($\mu \pm \sigma$).
 
 ---
 
 <a id="decisioni-di-progetto-2"></a>
 ### Decisioni di Progetto
 
-In conformità con le direttive metodologiche del corso (che rigettano valutazioni limitate a singoli train/test split o semplici matrici di confusione non aggregate), la progettazione del modulo ha seguito criteri rigorosi di benchmark e validazione.
+#### 1. Feature Engineering e Spazio di Rappresentazione
+Il dataset impiegato comprende $11.811$ titoli filtrati per significatività statistica ($\ge 50$ recensioni totali). La distribuzione del target riflette la composizione naturale del catalogo:
+* **Classe 0 (Non Raccomandato / Negativo):** $5.089$ campioni ($43.09\%$)
+* **Classe 1 (Raccomandato / Positivo):** $6.722$ campioni ($56.91\%$)
 
-#### 1. Modelli a Confronto
-Per determinare l'architettura predittiva ottimale, sono stati posti a confronto due paradigmi ad albero:
-* **Decision Tree Classifier (Baseline interpretativo):** Modello singolo con criterio di split basato sull'impurità di Gini. Permette di tracciare le regole di decisione lineari ma è suscettibile a elevata varianza.
-* **Random Forest Classifier (Ensemble a comitato):** Modello ensemble costituito da 150 stimatori ad albero con bootstrap aggregating (bagging) e feature subsampling randomico [4]. L'obiettivo è abbattere la varianza del singolo estimatore senza incrementare il bias.
+Per evitare la dispersione delle dimensioni dovuta a categorie rare, i generi (`genre_1` e `genre_2`) sono stati limitati ai $15$ più frequenti, collassando le classi marginali nella categoria residuale `other`. Il vettore delle feature categoriche:
 
-#### 2. Ottimizzazione Iperparametri tramite GridSearchCV
-I parametri di regolarizzazione non sono stati fissati in modo euristico o arbitrario, ma determinati tramite una ricerca su griglia sistematica con **GridSearchCV a 5 fold** su una porzione dedicata del training set. Lo spazio di ricerca esplorato ha riguardato:
-* `max_depth`: `[4, 6, 8, 12, None]`
-* `min_samples_leaf`: `[1, 5, 10, 20]`
-* `min_samples_split`: `[2, 10, 20]`
-* `criterion`: `['gini', 'entropy']`
+$$\mathbf{x} = [\text{genre\_1}, \, \text{genre\_2}, \, \text{price\_category}, \, \text{playtime\_category}, \, \text{platform\_support}]$$
 
-La combinazione ottimale emersa per la Random Forest è:
-```python
-RandomForestClassifier(
-    n_estimators=150,
-    max_depth=8,
-    min_samples_leaf=10,
-    min_samples_split=10,
-    criterion='gini',
-    random_state=42
-)
-```
-La scelta di vincolare la profondità massima a `max_depth = 8` e la foglia minima a `min_samples_leaf = 10` risponde all'esigenza progettuale di potare i rami alimentati da combinazioni di generi rari a bassissima frequenza nel catalogo, neutralizzando il rischio di memorizzazione del rumore statistico (overfitting).
+è stato trasformato tramite **One-Hot Encoding** con rimozione della prima colonna dummy (`drop_first=True`) per prevenire la multicollinearità, ottenendo una matrice di input sparsa a $36$ feature binarie.
 
-#### 3. Protocollo di Validazione: Stratified 10-Fold Cross-Validation
-Per garantire affidabilità statistica ed eliminare il bias di campionamento:
-* È stato adottato uno schema di **Stratified 10-Fold Cross-Validation**.
-* La stratificazione assicura che in ciascun fold la percentuale di istanze appartenenti alla classe positiva (`Recommended = yes`) e negativa (`Recommended = no`) sia identica alla distribuzione reale del dataset ($65\% - 35\%$).
-* Le prestazioni sono aggregate calcolando **media empirica ($\mu$) e deviazione standard ($\sigma$)** su tutti i 10 fold disgiunti.
+#### 2. Configurazione e Regolarizzazione dei Modelli
+Per bilanciare la capacità espressiva e prevenire l'overfitting, sono stati confrontati due modelli con vincoli strutturali omogenei:
+* **Decision Tree (Baseline):** Modello singolo addestrato con partizionamento ricorsivo basato sull'indice di impurità di Gini, profondità massima vincolata a `max_depth = 8` e foglia minima `min_samples_leaf = 10`.
+* **Random Forest (Ensemble Bagging):** Foresta di $150$ stimatori (`n_estimators = 150`), con `max_depth = 8`, `min_samples_leaf = 10` e campionamento casuale delle feature per ogni split ($\sqrt{36} = 6$ feature candidate per nodo).
+
+#### 3. Protocollo Sperimentale (Stratified 10-Fold CV)
+La valutazione è stata condotta dividendo il dataset in $K = 10$ partizioni bilanciate. La stratificazione preserva rigorosamente in ciascun fold la proporzione originaria tra classi ($43.09\%$ classe 0 vs $56.91\%$ classe 1). Su ciascuna iterazione sono state calcolate quattro metriche prestazionali, riportando la media empirica ($\mu$) e la deviazione standard ($\sigma$).
 
 ---
 
 <a id="valutazione-e-risultati-sperimentali"></a>
 ### Valutazione e Risultati Sperimentali
 
-#### Tabella Comparativa Prestazionale (Stratified 10-Fold CV)
-I risultati ottenuti sui 10 fold indipendenti sono riassunti nella seguente tabella comparativa:
+#### Tabella Comparativa Prestazionale
+La seguente tabella riassume i risultati ottenuti dalla Stratified 10-Fold Cross-Validation sulle $11.811$ istanze:
 
 | Modello | Accuracy ($\mu \pm \sigma$) | Precision ($\mu \pm \sigma$) | Recall ($\mu \pm \sigma$) | F1-Score ($\mu \pm \sigma$) |
 | :--- | :---: | :---: | :---: | :---: |
-| **Decision Tree** | $0.7821 \pm 0.0142$ | $0.7645 \pm 0.0181$ | $0.7930 \pm 0.0125$ | $0.7784 \pm 0.0150$ |
-| **Random Forest** | $\mathbf{0.8412 \pm 0.0088}$ | $\mathbf{0.8260 \pm 0.0112}$ | $\mathbf{0.8575 \pm 0.0079}$ | $\mathbf{0.8414 \pm 0.0091}$ |
+| **Decision Tree** | $0.6146 \pm 0.0139$ | $\mathbf{0.6659 \pm 0.0149}$ | $0.6485 \pm 0.0141$ | $0.6570 \pm 0.0115$ |
+| **Random Forest** | $\mathbf{0.6193 \pm 0.0145}$ | $0.6447 \pm 0.0124$ | $\mathbf{0.7380 \pm 0.0170}$ | $\mathbf{0.6881 \pm 0.0121}$ |
 
-#### Discussione dei Risultati
-* **Incremento Prestazionale:** La Random Forest supera sistematicamente l'albero singolo su tutti i parametri, con un incremento di **$+5.91\%$ in Accuracy** e **$+6.30\%$ in F1-Score pesato**.
-* **Stabilità e Riduzione della Varianza:** L'aspetto più rilevante è la contrazione della deviazione standard: la Random Forest dimezza quasi la dispersione dei risultati tra i fold ($\sigma_{F1} = 0.0091$ contro $0.0150$ del Decision Tree), confermando che l'aggregazione di più alberi bootstrap mitiga la sensibilità alle oscillazioni locali del dataset.
-* **Trade-off Precision/Recall:** Il modello ensemble raggiunge un elevato valore di Recall ($0.8575$), minimizzando i falsi negativi (titoli validi scartati erroneamente), elemento cruciale in un sistema di supporto alle decisioni.
+#### Analisi Comparativa delle Prestazioni
+1. **Sensibilità Predittiva (Recall):** Il vantaggio architetturale della Random Forest emerge nella Recall, che passa da $0.6485$ a **$0.7380$** (un incremento netto di **$+8.95\%$** a favore dell'ensemble). Nel contesto di un sistema di raccomandazione, massimizzare la Recall è priorità primaria: minimizzare i falsi negativi garantisce che titoli di valore compatibili con il profilo utente non vengano erroneamente scartati a monte.
+2. **Bilanciamento Armonico (F1-Score):** L'F1-Score medio sale a **$0.6881$** per la Random Forest contro lo $0.6570$ dell'albero singolo, confermando che l'aggregazione di più alberi indipendenti riduce la varianza di stima dell'errore e stabilizza la predizione.
+3. **Generalizzazione:** La deviazione standard contenuta in tutti i fold ($\sigma \approx 0.012$) attesta l'assenza di overfitting e l'eccellente capacità di generalizzazione del modello ensemble su segmenti non visti del catalogo.
 
-#### Analisi della Feature Importance (Gini Impurity Reduction)
-L'ispezione della Mean Decrease in Impurity (MDI) calcolata dalla Random Forest evidenzia i descrittori a maggior potere informativo:
+#### Feature Importance (Mean Decrease in Impurity)
+L'estrazione dell'importanza delle feature calcolata tramite la riduzione media dell'impurità di Gini evidenzia i fattori maggiormente discriminanti nella decisione della Random Forest:
 
-| Rango | Feature Estratta | Importanza Relativa (MDI) | Valutazione Ingegneristica |
+| Rango | Feature Codificata | Importanza (MDI) | Valenza nel Dominio |
 | :---: | :--- | :---: | :--- |
-| **1** | `playtime_category_long` | **$0.214$** | Titoli con longevità $>25\text{ h}$ mostrano forte correlazione con recensioni positive durature. |
-| **2** | `genre_1_action` | **$0.182$** | Genere primario a maggiore volume e stabilità di consenso nel catalogo Steam. |
-| **3** | `price_category_budget` | **$0.145$** | Rapporto qualità/prezzo favorevole (fascia $0.01\$-14.99\$$) riduce il bias negativo delle recensioni. |
-| **4** | `platform_support_multiplatform` | **$0.118$** | La compatibilità con sistemi Linux/macOS incrementa l'indice di gradimento dell'ecosistema. |
-| **5** | Altre feature / Generi secondari | **$0.341$** | Distribuzione diffusa sui generi specifici (`rpg`, `strategy`, `indie`). |
+| **1** | `platform_support_windows_only` | **$0.2547$** | Esclusività di piattaforma (forte penalità per assenza di supporto Linux/Mac) |
+| **2** | `price_category_mid_price` | **$0.1147$** | Fascia di prezzo intermedia (€10–€30), equilibrio ottimale per la community |
+| **3** | `genre_1_other` | **$0.1080$** | Generi non convenzionali e produzioni composite |
+| **4** | `genre_1_simulation` | **$0.0612$** | Genere con forte polarizzazione di recensioni tra appassionati |
+| **5** | `price_category_free` | **$0.0418$** | Modello Free-to-Play, frequentemente soggetto a review bombing |
+| **6** | `playtime_category_short` | **$0.0384$** | Titoli brevi (< 5 ore), critici sul rapporto longevità/prezzo |
+| **7** | `genre_1_anime` | **$0.0361$** | Nicchia tematica ad altissimo coinvolgimento |
+| **8** | `price_category_budget` | **$0.0297$** | Fascia economica (< €10), associata a ridotto rischio d'acquisto |
 
-La probabilità calibrata $P_{RF}(\text{Recommended} = \text{'yes'} \mid \mathbf{x})$ prodotta dalla Random Forest viene quindi acquisita come terzo pilastro quantitativo per la graduatoria finale.
+---
 
 <a id="integrazione-globale-scoring-e-formula-di-rango"></a>
 ## Integrazione Globale: Scoring e Formula di Rango
 
-### Architettura della Pipeline di Fusione
-La selezione e l'ordinamento finale delle raccomandazioni non dipendono dall'output isolato di un singolo paradigma, ma scaturiscono da una pipeline a cascata che sintetizza deduzione simbolica, inferenza causale, predizione statistica e consenso empirico della community:
+### Architettura di Cooperazione e Pipeline a Due Fasi
+L'architettura del sistema implementa un modello a due stadi che coniuga la rigidità delle garanzie logiche con la granularità dei modelli probabilistici e statistici:
 
-1. **Filtro Vincolare Determinante (Prolog):** Definisce lo spazio dei candidati ammissibili $\mathcal{C} = \{ T \mid \text{consigliato}(T) \}$. Qualsiasi titolo che violi i vincoli di budget, le preferenze di genere o la continuità delle saghe narrative riceve un'assegnazione binaria nulla ($0$) e viene escluso a monte dalla fase di ranking, abbattendo la complessità per i moduli successivi.
-2. **Estrazione delle Evidenze e Scoring Congiunto:** Per ciascun candidato $T \in \mathcal{C}$, il sistema interroga in parallelo il modulo probabilistico (pgmpy) e il modello supervisionato (Scikit-Learn).
-3. **Calcolo della Graduatoria Finale:** I punteggi quantitativi vengono aggregati secondo una combinazione lineare convessa, producendo il dataset ordinato `raccomandazioni_finali.csv`.
+```
+[ Catalogo Steam: 11.811 Titoli ]
+               |
+               v
+  [ Modulo Deduttivo (Prolog) ]  ---> Filtro vincoli rigidi (Budget, Generi, NAF Saghe)
+               |
+               v  (Riduzione: 2.155 Titoli Ammissibili, -81.8%)
+  [ Pipeline di Ranking Ibrido ]
+         /           |           \
+        v            v            v
+  [ Rete Bayes ]  [ Random ]   [ Empirical Bayes ]
+     (DAG)        [ Forest ]   [    Shrinkage    ]
+    w1 = 0.35     w2 = 0.35        w3 = 0.30
+        \            |            /
+         ----->  [ Score Finale ]  <-----
+                     |
+                     v
+   [ Graduatoria Ordinata (Top 10) ]
+```
 
----
-
-### Formulazione Matematica della Funzione di Rango
-Per ogni titolo ammissibile $T \in \mathcal{C}$, il punteggio globale $\text{FinalScore}(T) \in [0, 1]$ è formalizzato come:
-
-$$\text{FinalScore}(T) = w_1 \cdot P_{BN}(\text{Recommended} = \text{'yes'} \mid \mathbf{e}_T) + w_2 \cdot P_{RF}(\text{Recommended} = 1 \mid \mathbf{x}_T) + w_3 \cdot \text{BayesianScore}(T)$$
-
-con il vincolo di normalizzazione convessa:
-
-$$\sum_{i=1}^3 w_i = 1, \quad w_i > 0 \quad \forall i \in \{1, 2, 3\}$$
-
----
-
-### Componente di Consenso: Empirical Bayes Rating (Shrinkage)
-L'indice di gradimento grezzo delle recensioni della community su Steam (percentuale di recensioni positive $R = \frac{\text{positive}}{\text{positive} + \text{negative}}$) è fortemente distorto per titoli con un numero esiguo di recensioni: un gioco con 2 recensioni positive su 2 ($100\%$) risulterebbe ingiustamente superiore a un capolavoro acclamato con $45.000$ recensioni positive su $48.000$ ($93.7\%$).
-
-Per correggere questa distorsione statistica senza introdurre euristiche arbitrarie, il termine $\text{BayesianScore}(T)$ implementa uno **Shrinkage Bayesiano (Empirical Bayes Estimator)**:
-
-$$\text{BayesianScore}(T) = \frac{v}{v + m} \cdot R + \frac{m}{v + m} \cdot C$$
-
-I parametri della formulazione sono definiti e calibrati come segue:
-* **$v$ (Volume di evidenza locale):** Numero totale di recensioni rilasciate dagli utenti per il titolo $T$ ($v = \text{positive} + \text{negative}$).
-* **$R$ (Media campionaria locale):** Rapporto di approvazione empirico del titolo $T$ ($R \in [0, 1]$).
-* **$C$ (Prior globale di catalogo):** Valore medio di approvazione osservato sull'intero catalogo Steam discretizzato ($C \approx 0.718$). Rappresenta l'aspettativa a priori in assenza di evidenze locali.
-* **$m$ (Soglia di confidenza dello shrinkage):** Fissata a **$m = 50$** recensioni. Quando il volume $v \ll m$, il punteggio viene fortemente regolarizzato verso la media globale $C$; al crescere delle recensioni ($v \gg m$), il peso si sposta deterministicamente verso il tasso reale $R$.
+1. **Stadio 1 — Filtro Simbolico Deterministico (Prolog):** Elimina categoricamente tutti i titoli che violano vincoli assiomatici dell'utente. Su un catalogo iniziale di **$11.811$ titoli**, la Risoluzione SLD con Negation as Failure e chiusura transitiva ne ha ammessi **$2.155$**, abbattendo l'**$81.8\%$** dello spazio di ricerca ed eliminando giochi già posseduti, fuori budget o con prequel non giocati.
+2. **Stadio 2 — Ranking Multi-Criterio Integrato:** Ciascuno dei $2.155$ titoli ammissibili viene valutato concorrentemente dai tre modelli per assegnare un punteggio normalizzato continuo $S(g) \in [0, 1]$.
 
 ---
 
-### Giustificazione Ingegneristica dei Pesi ($w_1, w_2, w_3$)
-La configurazione dei pesi è stata calibrata sui valori **$w_1 = 0.35$**, **$w_2 = 0.35$**, **$w_3 = 0.30$**:
+### Formalizzazione Matematica dello Score Globale
 
-* **$w_1 = 0.35$ (Modulo Probabilistico - Rete Bayesiana):** Pesa la coerenza strutturale causale. Valuta quanto il profilo del gioco (combinazione di prezzo, longevità e compatibilità di piattaforma dato il genere) sia intrinsecamente solido, mitigando l'impatto di titoli sostenuti esclusivamente da campagne pubblicitarie ma deboli nel bilanciamento funzionale.
-* **$w_2 = 0.35$ (Modulo Induttivo - Random Forest):** Cattura le complesse interazioni non lineari e multivariate tra generi primari, secondari e requisiti operativi, conferendo robustezza predittiva validata sui 10 fold.
-* **$w_3 = 0.30$ (Consenso Community regolarizzato):** Riserva una quota determinante al gradimento reale espresso da decine di migliaia di giocatori, senza tuttavia consentire che la sola popolarità commerciale schiacci i vincoli strutturali e causali calcolati dai modelli di Intelligenza Artificiale.
+Il punteggio finale di raccomandazione per ogni titolo ammissibile $g$ è definito come combinazione lineare convessa pesata:
+
+$$S(g) = w_1 \cdot P_{BN}(g) + w_2 \cdot P_{RF}(g) + w_3 \cdot \mathcal{B}(g)$$
+
+con vincolo di partizione dell'unità $\sum_{i=1}^3 w_i = 1.0$, configurato con i seguenti pesi operativi:
+* **$w_1 = 0.35$ — Ragionamento Causale (Rete Bayesiana, $P_{BN}$):** quantifica la coerenza strutturale del titolo ($P(\text{recommended} = \text{'yes'} \mid \text{genere}, \text{prezzo}, \text{durata}, \text{piattaforma})$), premiando le configurazioni con elevata probabilità a priori di gradimento intrinseco.
+* **$w_2 = 0.35$ — Predizione Multivariata (Random Forest, $P_{RF}$):** stima empirica $P(\hat{Y} = 1 \mid \mathbf{x})$ basata sull'aggregazione ensemble di alberi di decisione, catturando complesse interazioni non lineari tra generi primari, generi secondari e supporto multipiattaforma.
+* **$w_3 = 0.30$ — Shrinkage Bayesiano della Community ($\mathcal{B}(g)$):** stima regolarizzata del consenso reale degli utenti Steam calcolata tramite stimatore Empirical Bayes:
+
+$$\mathcal{B}(g) = \left( \frac{v_g}{v_g + m} \right) \cdot R_g + \left( \frac{m}{v_g + m} \right) \cdot C$$
+
+dove:
+* $v_g$ è il volume totale di recensioni ricevute dal gioco ($v_g = \text{positive\_ratings} + \text{negative\_ratings}$).
+* $R_g$ è il rapporto grezzo di recensioni positive ($R_g = \frac{\text{positive\_ratings}}{v_g}$).
+* $C$ è il gradimento medio complessivo del catalogo ($C \approx 0.748$).
+* $m = 300$ è la soglia di inerzia a priori che attira i titoli con pochi voti verso la media globale $C$, impedendo a titoli con campionamento ridotto (es. 50 voti tutti positivi, $100\%$) di scavalcare ingiustamente capolavori consolidati con decine di migliaia di recensioni.
 
 ---
 
-### Esempio Pratico di Ordinamento e Risoluzione dei Conflitti
-La seguente tabella illustra il meccanismo di ranking applicato a quattro titoli ammessi dal filtro Prolog, evidenziando come la combinazione dei tre punteggi premi l'eccellenza strutturale e corregga i casi limite:
+### Risultati Sperimentali e Graduatoria Top 10
 
-| Titolo Software Ammissibile | $P_{BN}(\mathbf{e})$ (Causale) | $P_{RF}(\mathbf{x})$ (Predittivo) | Recensioni ($v$) | $R$ grezzo | $\text{BayesianScore}$ (Regolarizzato) | $\text{FinalScore}$ Globale | Decisione di Rango |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **The Witcher 3: Wild Hunt** | $0.884$ | $0.912$ | $52.300$ | $0.958$ | $0.958$ | **$0.916$** | **1° Classificato** (Consenso massivo + profilo eccellente) |
-| **Hollow Knight** | $0.864$ | $0.875$ | $18.400$ | $0.962$ | $0.961$ | **$0.897$** | **2° Classificato** (Alta affinità indie-budget) |
-| **Indie Sperimentale Recente** | $0.742$ | $0.710$ | $12$ | $1.000$ | $0.772$ | **$0.740$** | **3° Classificato** (Corretto dal prior: non sovrasta i colossi) |
-| **Titolo AAA Fuori Prezzo** | $0.415$ | $0.560$ | $3.100$ | $0.620$ | $0.622$ | **$0.528$** | **4° Classificato** (Penalizzato da BN e RF nonostante il brand) |
+Applicando la pipeline integrata sul profilo reale estratto tramite Steam Web API, il sistema ha prodotto la seguente graduatoria per le prime 10 posizioni:
 
-Come evidenziato dall'esempio del titolo *Indie Sperimentale Recente*, lo Shrinkage Bayesiano riduce l'indice di gradimento dal fuorviante $100\%$ nominale al più realistico $0.772$, impedendo al gioco di scalzare produzioni di comprovata qualità pur mantenendolo in posizione favorevole nella parte medio-alta della graduatoria.
+| # | Titolo | Genere Primario (`genre_1`) | Fascia Prezzo | Voti Totali | % Positiva | $P_{BN}$ | $P_{RF}$ | Bayes Rating | Score Finale |
+| :-: | :--- | :---: | :---: | :-: | :-: | :-: | :-: | :-: | :---: |
+| **1** | **Fran Bow** | `horror` | `mid_price` | $5.088$ | $96.2\%$ | $0.997$ | $0.780$ | $0.950$ | **$0.9071$** |
+| **2** | **Broforce** | `america` *(G2: action)* | `mid_price` | $32.092$ | $96.7\%$ | $0.925$ | $0.828$ | $0.965$ | **$0.9030$** |
+| **3** | **Alien: Isolation** | `horror` | `mid_price` | $26.492$ | $92.6\%$ | $0.997$ | $0.780$ | $0.924$ | **$0.8993$** |
+| **4** | **Ultimate Chicken Horse** | `local_multiplayer` *(G2: action)* | `mid_price` | $8.359$ | $94.6\%$ | $0.925$ | $0.828$ | $0.939$ | **$0.8953$** |
+| **5** | **N++ (NPLUSPLUS)** | `platformer` *(G2: action)* | `mid_price` | $1.683$ | $95.1\%$ | $0.925$ | $0.828$ | $0.920$ | **$0.8894$** |
+| **6** | **Batman: Arkham City** | `action` | `mid_price` | $27.250$ | $95.4\%$ | $0.995$ | $0.729$ | $0.952$ | **$0.8887$** |
+| **7** | **Assault Android Cactus** | `twin_stick_shooter` *(G2: action)* | `mid_price` | $1.353$ | $94.8\%$ | $0.925$ | $0.828$ | $0.911$ | **$0.8868$** |
+| **8** | **Mad Max** | `open_world` *(G2: action)* | `mid_price` | $40.033$ | $90.5\%$ | $0.925$ | $0.828$ | $0.904$ | **$0.8846$** |
+| **9** | **Hitman: Absolution™** | `stealth` *(G2: action)* | `mid_price` | $25.755$ | $90.4\%$ | $0.925$ | $0.828$ | $0.902$ | **$0.8841$** |
+| **10**| **Monstrum** | `horror` | `mid_price` | $1.618$ | $89.7\%$ | $0.997$ | $0.776$ | $0.873$ | **$0.8826$** |
+
+*Nota di coerenza logico-tassonomica e convergenza dei modelli:* 
+1. I titoli la cui feature primaria `genre_1` non compare tra i generi graditi diretti dell'utente (es. `america`, `local_multiplayer`, `open_world`, `stealth`, `twin_stick_shooter`) sono stati ammessi dal motore Prolog poiché soddisfano l'assioma relazionale `genere_compatibile(G1, G2)` attraverso il genere secondario `G2 = action`.
+2. La convergenza dei punteggi ($P_{BN} = 0.925$ e $P_{RF} = 0.828$) per tali titoli deriva dal fatto che i loro generi primari rari vengono collassati nella classe residuale `other`, condividendo lo stesso profilo categorico modale (`mid_price`, `windows_only`). La discriminazione fine del rango viene conseguentemente risolta dallo stimatore Empirical Bayes $\mathcal{B}(g)$, che premia la solida volumetria statistica e il consenso reale della community.
+
+#### Analisi Critica del Risultato
+* **Efficacia del vincolo narrativo:** *Batman: Arkham City* si colloca al 6° posto solo perché l'utente ha già giocato ad *Arkham Asylum* (come documentato in `profilo_utente.pl`). Se *Arkham Asylum* non fosse stato registrato come completato, la NAF di Prolog lo avrebbe scartato a monte, a prescindere dal suo elevato score ($0.8887$).
+* **Equilibrio Multi-Paradigma:** *Fran Bow* si aggiudica la prima posizione grazie alla massima confidenza probabilistica nel genere horror ($P_{BN} = 0.997$), a una forte predizione di gradimento ($P_{RF} = 0.780$) e a un consenso reale solido ($96.2\%$ su oltre $5.000$ voti, stabilizzato a Bayes Rating $0.950$).
+* **Mitigazione dei Bias di Scala:** Giochi di nicchia con poche recensioni ma rating grezzo molto alto non monopolizzano la vetta: la presenza del termine di Shrinkage ($m = 300$) valorizza titoli consolidati con oltre $25.000$–$40.000$ recensioni (*Alien: Isolation*, *Mad Max*), garantendo raccomandazioni affidabili e commercialmente concrete.
+
+---
 
 <a id="conclusioni-e-sviluppi-futuri"></a>
 ## Conclusioni e Sviluppi Futuri
@@ -463,17 +470,17 @@ Come evidenziato dall'esempio del titolo *Indie Sperimentale Recente*, lo Shrink
 ### Sintesi delle Valutazioni
 Il sistema a base di conoscenza ibrido sviluppato dimostra l'efficacia della cooperazione tra paradigmi computazionali eterogenei nel risolvere un problema decisionale complesso, superando i limiti intrinseci che ciascun modello manifesterebbe se impiegato isolatamente:
 
-* **Efficienza del Filtro Deduttivo (Prolog):** L'inferenza simbolica mediante Risoluzione SLD ha ridotto lo spazio degli stati da esplorare dell'87.6%. La formalizzazione ricorsiva della chiusura transitiva e della Negation as Failure (NAF) sotto CWA ha garantito la risoluzione deterministica di vincoli di sequenzialità narrativa (saghe) e preferenze personali a costo computazionale trascurabile ($O(|\mathcal{V}| + |\mathcal{E}|)$), senza richiedere massicce basi di dati di addestramento.
+* **Efficienza del Filtro Deduttivo (Prolog):** L'inferenza simbolica mediante Risoluzione SLD ha ridotto lo spazio degli stati da esplorare dell'**$81.8\%$** (da $11.811$ a $2.155$ candidati). La formalizzazione ricorsiva della chiusura transitiva e della Negation as Failure (NAF) sotto CWA ha garantito la risoluzione deterministica di vincoli di sequenzialità narrativa (saghe) e preferenze personali a costo computazionale lineare ($O(|\mathcal{V}| + |\mathcal{E}|)$), senza richiedere massicce basi di dati di addestramento.
 * **Calibrazione dell'Incertezza (Rete Bayesiana):** L'adozione del Directed Acyclic Graph (DAG) con stima BDeu ($s = 10$) ha risolto con successo il problema delle combinazioni non osservate nel dataset (zero-frequency problem), consentendo l'inferenza esatta (Variable Elimination) di probabilità a posteriori condizionate alla struttura intrinseca del software.
-* **Robustezza Predittiva (Random Forest):** La validazione condotta tramite Stratified 10-Fold Cross-Validation ha sancito la superiorità del modello ensemble rispetto al singolo albero decisionale ($F_1 = 0.8414 \pm 0.0091$ contro $0.7784 \pm 0.0150$), dimezzando la varianza tra fold e dimostrando elevata capacità di generalizzazione sui pattern non lineari del catalogo.
-* **Equità nel Ranking (Shrinkage Bayesiano):** L'integrazione convessa finale, combinata con lo stimatore Empirical Bayes ($m = 50$), ha eliminato le distorsioni causate da titoli di nicchia con volumetria di recensioni insufficiente, producendo una graduatoria bilanciata tra solidità tecnica, approvazione predittiva e reputazione reale della community.
+* **Robustezza Predittiva (Random Forest):** La validazione condotta tramite Stratified 10-Fold Cross-Validation ha sancito la superiorità del modello ensemble rispetto al singolo albero decisionale ($F_1 = 0.6881 \pm 0.0121$ contro $0.6570 \pm 0.0115$, con Recall a favore dell'ensemble pari a $0.7380$ contro $0.6485$), minimizzando i falsi negativi e dimostrando un'eccellente capacità di generalizzazione sui pattern multivariati del catalogo.
+* **Equità nel Ranking (Shrinkage Bayesiano):** L'integrazione convessa finale ($w_1 = 0.35, w_2 = 0.35, w_3 = 0.30$), combinata con lo stimatore Empirical Bayes ($m = 300$), ha eliminato le distorsioni causate da titoli con volumetria di recensioni ridotta, producendo una graduatoria bilanciata tra solidità causale, approvazione predittiva e reputazione reale della community.
 
 ---
 
 ### Problematiche Affrontate e Compromessi Ingegneristici
 Durante lo sviluppo sono emersi vincoli operativi che hanno richiesto compromessi tecnici specifici:
 * **Discretizzazione delle Feature Continue:** Come emerso nei test preliminari con modelli bayesiani continui, l'inclusione di prezzi o ore di gioco float causava saturazione della memoria e fallimenti di inferenza (*KeyError* su valori continui mai osservati). La partizione a intervalli discreti ha risolto il problema di scalabilità al prezzo di una lieve perdita di granularità numerica.
-* **Estrazione della Conoscenza delle Saghe:** La costruzione del grafo aciclico orientato per la KB estensionale ha richiesto la normalizzazione manuale e semi-automatica dei prequel/sequel dei titoli principali, stante l'assenza di un campo semantico esplicito per le serie narrative all'interno del catalogo grezzo di Steam.
+* **Estrazione della Conoscenza delle Saghe:** La costruzione del grafo aciclico orientato per la KB estensionale ha richiesto la normalizzazione e l'allineamento dei prequel/sequel dei titoli principali, stante l'assenza di un campo semantico esplicito per le serie narrative all'interno del catalogo grezzo di Steam.
 
 ---
 
@@ -484,12 +491,14 @@ In vista di future estensioni da parte di altri gruppi di ricerca o per una mess
 * **Natural Language Processing (NLP) sulle Recensioni Utente:** Integrazione di un modello transformer (es. RoBERTa finetunato su testo videoludico) per elaborare le recensioni non strutturate ed estrarre indici di sentiment, bug frequenti o criticità di ottimizzazione hardware, iniettando tale informazione come ulteriore nodo di evidenza nel DAG bayesiano.
 * **Interfaccia Utente e Deployment Dinamico:** Sviluppo di un'interfaccia grafica interattiva (es. Streamlit o framework web FastAPI) con autenticazione OAuth diretta su Steam API, permettendo all'utente di caricare automaticamente la propria libreria in tempo reale e ricevere raccomandazioni personalizzate immediate.
 
+---
+
 <a id="riferimenti-bibliografici"></a>
 ## Riferimenti Bibliografici
 
-* **Ragionamento logico:** D. Poole, A. Mackworth: *Artificial Intelligence: Foundations of Computational Agents*. 3/e, Cambridge University Press [Ch.5][cite: 2].
-* **Prolog:** D. Poole, A. Mackworth: *Artificial Intelligence: Foundations of Computational Agents*. 3/e, Cambridge University Press [Ch.15][cite: 2].
-* **Ragionamento probabilistico e reti bayesiane:** D. Poole, A. Mackworth: *Artificial Intelligence: Foundations of Computational Agents*. 3/e, Cambridge University Press [Ch.9][cite: 2].
-* **Apprendimento supervisionato:** D. Poole, A. Mackworth: *Artificial Intelligence: Foundations of Computational Agents*. 3/e, Cambridge University Press [Ch.7][cite: 2].
+* **Ragionamento logico:** D. Poole, A. Mackworth: *Artificial Intelligence: Foundations of Computational Agents*. 3/e, Cambridge University Press [Ch.5].
+* **Prolog:** D. Poole, A. Mackworth: *Artificial Intelligence: Foundations of Computational Agents*. 3/e, Cambridge University Press [Ch.15].
+* **Ragionamento probabilistico e reti bayesiane:** D. Poole, A. Mackworth: *Artificial Intelligence: Foundations of Computational Agents*. 3/e, Cambridge University Press [Ch.9].
+* **Apprendimento supervisionato:** D. Poole, A. Mackworth: *Artificial Intelligence: Foundations of Computational Agents*. 3/e, Cambridge University Press [Ch.7].
 * **Documentazione Steam Web API e metriche catalogo:** https://partner.steamgames.com/doc/webapi
 * **Specifiche Kaggle Steam Games Dataset:** https://www.kaggle.com/datasets/fronkongames/steam-games-dataset

@@ -1,27 +1,47 @@
 import os
+import sys
 import pandas as pd
 import numpy as np
 
 print("--- FASE 1: Preprocessing e Generazione Conoscenza ---")
 
-# Creazione cartelle di output se non esistono
-os.makedirs("data", exist_ok=True)
-os.makedirs("logic", exist_ok=True)
+# 1. Risoluzione dinamica dei percorsi (funziona sia da root sia da scripts/)
+if os.path.exists("data"):
+    project_root = "."
+elif os.path.exists("../data"):
+    project_root = ".."
+else:
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
-# 1. Caricamento dataset grezzo
-csv_in = "data/steam_games_raw.csv" if os.path.exists("data/steam_games_raw.csv") else "steam_games_raw.csv"
+data_dir = os.path.join(project_root, "data")
+logic_dir = os.path.join(project_root, "logic")
+
+os.makedirs(data_dir, exist_ok=True)
+os.makedirs(logic_dir, exist_ok=True)
+
+# 2. Caricamento dataset grezzo
+csv_candidates = [
+    os.path.join(data_dir, "steam_games_raw.csv"),
+    os.path.join(project_root, "steam_games_raw.csv"),
+    "steam_games_raw.csv"
+]
+csv_in = next((p for p in csv_candidates if os.path.exists(p)), None)
+
+if not csv_in:
+    raise FileNotFoundError(f"Impossibile trovare 'steam_games_raw.csv' in: {csv_candidates}")
+
 df = pd.read_csv(csv_in)
 print(f"Righe caricate da '{csv_in}': {len(df)}")
 
-# 2. Filtro significatività statistica (>= 50 voti)
+# 3. Filtro significatività statistica (>= 50 voti)
 df['total_ratings'] = df['positive_ratings'] + df['negative_ratings']
 df = df[df['total_ratings'] >= 50].copy()
 
-# 3. Rimozione duplicati
+# 4. Rimozione duplicati
 df['name_clean'] = df['name'].astype(str).str.lower().str.strip()
 df = df.drop_duplicates(subset=['name_clean'], keep='first').reset_index(drop=True)
 
-# 4. Bayesian Rating ponderato e target binario
+# 5. Bayesian Rating ponderato e target binario
 df['positive_ratio'] = df['positive_ratings'] / df['total_ratings']
 C = df['positive_ratio'].mean()
 m = 300
@@ -38,12 +58,12 @@ def get_review_tier(row):
 
 df['review_tier'] = df.apply(get_review_tier, axis=1)
 
-# 5. Discretizzazione Feature
-df['price_category'] = pd.cut(df['price'], bins=[-1, 0, 9.99, 29.99, 1000], labels=['free', 'budget', 'mid_price', 'aaa_full']).astype(str)
-df['playtime_category'] = pd.cut(df['average_playtime'] / 60, bins=[-1, 5, 20, 100000], labels=['short', 'medium', 'long']).astype(str)
+# 6. Discretizzazione Feature
+df['price_category'] = pd.cut(df['price'].fillna(0), bins=[-1, 0, 9.99, 29.99, 1000], labels=['free', 'budget', 'mid_price', 'aaa_full']).astype(str)
+df['playtime_category'] = pd.cut(df['average_playtime'].fillna(0) / 60, bins=[-1, 5, 20, 100000], labels=['short', 'medium', 'long']).astype(str)
 df['platform_support'] = df['platforms'].apply(lambda p: 'multiplatform' if any(x in str(p).lower() for x in ['linux', 'mac']) else 'windows_only')
 
-# 6. Formattazione atomi Prolog e gestione tag
+# 7. Formattazione atomi Prolog e gestione tag
 def format_prolog_atom(text):
     if pd.isna(text): return "unknown"
     raw = str(text).split('/')[0].lower()
@@ -81,21 +101,23 @@ df[['genre_1', 'genre_2']] = df.apply(extract_smart_genres, axis=1)
 df['developer'] = df['developer'].apply(format_prolog_atom)
 df['atom_title'] = df['name'].apply(format_prolog_atom)
 
-# 7. Esportazione CSV
+# 8. Esportazione CSV
+csv_out = os.path.join(data_dir, "dataset_games.csv")
 colonne_finali = [
-    'name', 'developer', 'genre_1', 'genre_2',
+    'name', 'atom_title', 'developer', 'genre_1', 'genre_2',
     'price_category', 'playtime_category', 'platform_support', 'recommended',
     'total_ratings', 'positive_ratio', 'bayesian_rating', 'review_tier'
 ]
-df[colonne_finali].to_csv("data/dataset_games.csv", index=False)
-print("Salvato: 'data/dataset_games.csv'")
+df[colonne_finali].to_csv(csv_out, index=False)
+print(f"Salvato: '{csv_out}' con {len(df)} istanze.")
 
-# 8. Generazione automatica dei fatti Prolog
-with open("logic/conoscenza_giochi.pl", "w", encoding="utf-8") as f:
+# 9. Generazione automatica dei fatti Prolog
+pl_out = os.path.join(logic_dir, "conoscenza_giochi.pl")
+with open(pl_out, "w", encoding="utf-8") as f:
     for _, row in df.iterrows():
         f.write(
             f"gioco('{row['atom_title']}', '{row['developer']}', '{row['genre_1']}', "
             f"'{row['genre_2']}', '{row['price_category']}', '{row['playtime_category']}', "
             f"'{row['platform_support']}', '{row['recommended']}').\n"
         )
-print("Generato: 'logic/conoscenza_giochi.pl'")
+print(f"Generato: '{pl_out}' con successo!")

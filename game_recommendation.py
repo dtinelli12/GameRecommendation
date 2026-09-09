@@ -1,11 +1,14 @@
 import os
 import sys
 import subprocess
+import warnings
 import pandas as pd
 import numpy as np
-from pyswip import Prolog
 
-# Import dei moduli pgmpy e scikit-learn
+# Silenzia warning interni di librerie terze per un output a terminale pulito
+warnings.filterwarnings('ignore')
+
+from pyswip import Prolog
 from pgmpy.models import DiscreteBayesianNetwork
 from pgmpy.estimators import BayesianEstimator
 from pgmpy.inference import VariableElimination
@@ -15,14 +18,33 @@ print("===================================================================")
 print(" SISTEMA IBRIDO: LOGICA + RETE BAYESIANA + ML + COMMUNITY RATING ")
 print("===================================================================\n")
 
-# Controllo preliminare di consistenza
-dataset_path = "data/dataset_games.csv" if os.path.exists("data") else "dataset_games.csv"
-conoscenza_path = "logic/conoscenza_giochi.pl" if os.path.exists("logic") else "conoscenza_giochi.pl"
+# Risoluzione dinamica dei percorsi
+base_dir = os.path.dirname(os.path.abspath(__file__))
+dataset_candidates = [
+    os.path.join(base_dir, "data", "dataset_games.csv"),
+    os.path.join(base_dir, "dataset_games.csv"),
+    "data/dataset_games.csv",
+    "dataset_games.csv"
+]
+dataset_path = next((p for p in dataset_candidates if os.path.exists(p)), None)
 
-if not os.path.exists(dataset_path) or not os.path.exists(conoscenza_path):
+conoscenza_candidates = [
+    os.path.join(base_dir, "logic", "conoscenza_giochi.pl"),
+    os.path.join(base_dir, "conoscenza_giochi.pl"),
+    "logic/conoscenza_giochi.pl",
+    "conoscenza_giochi.pl"
+]
+conoscenza_path = next((p for p in conoscenza_candidates if os.path.exists(p)), None)
+
+# Controllo preliminare di consistenza
+if not dataset_path or not conoscenza_path:
     print("[INIT] File di conoscenza non trovati. Avvio preprocessing automatico...")
-    script_prep = "scripts/preprocess.py" if os.path.exists("scripts/preprocess.py") else "preprocess.py"
+    script_prep = os.path.join(base_dir, "scripts", "preprocess.py")
+    if not os.path.exists(script_prep):
+        script_prep = os.path.join(base_dir, "preprocess.py")
     subprocess.run([sys.executable, script_prep], check=True)
+    dataset_path = os.path.join(base_dir, "data", "dataset_games.csv")
+    conoscenza_path = os.path.join(base_dir, "logic", "conoscenza_giochi.pl")
 
 # 1. Caricamento Dataset e Lookup
 print("[1/5] Caricamento del dataset unificato...")
@@ -60,7 +82,27 @@ for _, row in df.iterrows():
 print("[2/5] Consultazione Base di Conoscenza Prolog ed estrazione candidati ammissibili...")
 prolog = Prolog()
 prolog.consult(conoscenza_path)
-prolog.consult("logic/regole.pl" if os.path.exists("logic/regole.pl") else "regole.pl")
+
+profilo_candidates = [
+    os.path.join(base_dir, "logic", "profilo_utente.pl"),
+    os.path.join(base_dir, "profilo_utente.pl"),
+    "logic/profilo_utente.pl",
+    "profilo_utente.pl"
+]
+profilo_path = next((p for p in profilo_candidates if os.path.exists(p)), None)
+if profilo_path:
+    prolog.consult(profilo_path)
+
+regole_candidates = [
+    os.path.join(base_dir, "logic", "regole.pl"),
+    os.path.join(base_dir, "regole.pl"),
+    "logic/regole.pl",
+    "regole.pl"
+]
+regole_path = next((p for p in regole_candidates if os.path.exists(p)), None)
+if not regole_path:
+    raise FileNotFoundError("Impossibile trovare 'regole.pl'.")
+prolog.consult(regole_path)
 
 simbolico_candidati = list(prolog.query("consigliato(Titolo)"))
 titoli_ammessi = list(set(str(res['Titolo']) for res in simbolico_candidati))
@@ -136,10 +178,10 @@ for atom in titoli_ammessi:
     
     p_bayes = get_bayes_prob(meta['genre_1'], meta['price'], meta['playtime'], meta['platform'])
     p_ml = get_ml_prob(meta['genre_1'], meta['genre_2'], meta['price'], meta['playtime'], meta['platform'])
-    score_modelli = (0.50 * p_bayes) + (0.50 * p_ml)
-    
     b_rating = meta['bayesian_rating']
-    score_finale = (0.50 * score_modelli) + (0.50 * b_rating)
+    
+    # Formula di rango pesata: 0.35 BN + 0.35 RF + 0.30 Bayesian Shrinkage
+    score_finale = (0.35 * p_bayes) + (0.35 * p_ml) + (0.30 * b_rating)
     
     candidati_valutati.append({
         'name': meta['name'],
@@ -154,21 +196,24 @@ for atom in titoli_ammessi:
         'score_finale': round(score_finale, 4)
     })
 
-df_ranking = pd.DataFrame(candidati_valutati).sort_values(by='score_finale', ascending=False).reset_index(drop=True)
+df_ranking = pd.DataFrame(candidati_valutati).sort_values(
+    by=['score_finale', 'total_votes'], ascending=[False, False]
+).reset_index(drop=True)
 
-# Visualizzazione Top 15
-print("\n" + "="*105)
+# Visualizzazione Top 15 (con formattazione allargata)
+print("\n" + "="*108)
 print(" TOP 15 RACCOMANDAZIONI FINALI PERSONALIZZATE ")
-print("="*105)
-print(f"{'#':<3} | {'TITOLO':<30} | {'GENERE':<10} | {'PREZZO':<9} | {'VOTI':<8} | {'% POS':<6} | {'BAYES':<6} | {'ML':<6} | {'COMMUNITY':<9} | {'FINALE'}")
-print("-" * 105)
+print("="*108)
+print(f"{'#':<3} | {'TITOLO':<30} | {'GENERE':<10} | {'PREZZO':<11} | {'VOTI':<8} | {'% POS':<6} | {'BAYES':<6} | {'ML':<6} | {'COMMUNITY':<9} | {'FINALE'}")
+print("-" * 108)
 
 for i in range(min(15, len(df_ranking))):
     r = df_ranking.iloc[i]
     t = r['name'][:28]
     g = r['genre_1'][:9]
-    p = r['price'][:8]
-    print(f"{i+1:<3} | {t:<30} | {g:<10} | {p:<9} | {r['total_votes']:<8} | {r['pos_ratio']:<6.1f} | {r['p_bayes']:<6.3f} | {r['p_ml']:<6.3f} | {r['b_rating']:<9.3f} | {r['score_finale']:.4f}")
+    p = r['price'][:10]
+    print(f"{i+1:<3} | {t:<30} | {g:<10} | {p:<11} | {r['total_votes']:<8} | {r['pos_ratio']:<6.1f} | {r['p_bayes']:<6.3f} | {r['p_ml']:<6.3f} | {r['b_rating']:<9.3f} | {r['score_finale']:.4f}")
 
-df_ranking.to_csv("raccomandazioni_finali.csv", index=False)
-print("\nReport esportato con successo in 'raccomandazioni_finali.csv'!")
+out_csv = os.path.join(base_dir, "raccomandazioni_finali.csv")
+df_ranking.to_csv(out_csv, index=False)
+print(f"\nReport esportato con successo in '{out_csv}'!")
